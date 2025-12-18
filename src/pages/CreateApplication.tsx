@@ -1,27 +1,34 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import z from "zod";
-import api from "../config/api";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+import NavBar from "./NavbarComponent";
 
 const applicationSchema = z.object({
-  education: z.string().min(1, "Full name is required"),
+  coverLetter: z.string().min(1, "Cover letter is required"),
+  phone: z.number().min(11, "Phone must be at least 11 characters"),
+  address:z.string(),
   dateofBirth: z.string().refine((val) => !isNaN(Date.parse(val)), {
-      message: "Invalid date format",
-    
+    message: "Invalid date format",
   }),
-  contactNumber: z
+
+  resume: z.any().optional(),
+  expectedSalary: z
     .number()
-    .min(10, "Contact number must be at least 10 digits"),
-  experience: z.number().min(0, "Experience must be a positive number"),
-  skills: z.string().min(1, "Skills are required"),
-  resume: z.any(),
+    .min(1, "Expected salary must be a positive number"),
 });
 
 type CreateApplicationInput = z.infer<typeof applicationSchema>;
 
 function CreateApplication() {
   const navigate = useNavigate();
+  const { jobId } = useParams ();
+  const stringifyUser = localStorage.getItem("user");
+  const parsedUser = stringifyUser ? JSON.parse(stringifyUser) : null;
+  const userId = parsedUser?._id;
+  console.log("userId", userId);
+  console.log(jobId, "jobid");
 
   const {
     register,
@@ -30,135 +37,142 @@ function CreateApplication() {
   } = useForm<CreateApplicationInput>({
     resolver: zodResolver(applicationSchema),
     defaultValues: {
-      education: "",
+      coverLetter: "",
       dateofBirth: new Date().toISOString().split("T")[0],
-      contactNumber: 0,
-      experience: 0,
-      skills: "",
       resume: null,
+      phone:0,
+      address:"",
+      expectedSalary: 0,
     },
   });
 
+ 
+
   const onSubmit = async (data: CreateApplicationInput) => {
+    const payLoad = {
+      coverLetter: data.coverLetter,
+      expectedSalary: data.expectedSalary,
+      address:data.address,
+      phone:data.phone,
+      dateOfBirth:data.dateofBirth
+    };
     try {
-      const res = await api.post("/applicant", data);
+      const token = localStorage.getItem("accessToken");
+      const res = await axios.post(
+        `http://localhost:5000/api/application/jobs/${jobId}`,
+        payLoad,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
       console.log("application creation successful", res.data);
       navigate("/applicant-dashboard");
     } catch (err) {
-      console.error("Application creation failled", err);
+      console.error("Application creation failed", err);
     }
   };
 
   return (
     <>
-      <div className="vh-100" style={{ background: "#f9f9f5" }}>
-        <div className="p-5">
-          <h1 className="text-center fs-48 fw-bold">Apply for Job</h1>
-          <p className="text-center mt-3">
+      
+      <NavBar/>
+
+      <div style={{ background: "#f9f9f5" }}>
+        <div className="pb-3 ">
+          <h1 className="text-center fs-48 fw-bold mt-5">Apply for Job</h1>
+          <p className="text-center mt-2">
             Fill out the application form to apply
           </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <div
-            className="p-5"
-            style={{ height: "750px", width: "100%", background: "#f9f9f5" }}
+        <div className=" d-flex justify-content-center">
+          <form
+          
+            onSubmit={handleSubmit(onSubmit)}
+            style={{
+              background: "transparent",
+              width: "75%",
+              padding: "30px",
+            }}
+            className="border rounded-2 mb-5"
           >
             <div
-              className=" p-4 rounded"
-              style={{ height: "770px", width: "100%", background: "white" }}
+              className=" p-4 rounded mb-4 border"
+              style={{ background: "white", width: "100%" }}
             >
               <h1>Personal Information</h1>
               <p>Your details to apply for this job</p>
 
-              <label htmlFor="fullName"> Education</label>
-              <input
-                type="text"
+              <label htmlFor="fullName mt-2"> Cover Letter</label>
+              <textarea
                 id="fullName"
-                placeholder="Enter your  education"
+                placeholder="Enter your cover letter"
                 className="form-control mt-3"
-                {...register("education")}
-              />
-              {errors.education && (
-                <p className="text-danger">{errors.education.message}</p>
+                {...register("coverLetter")}
+              ></textarea>
+              {errors.coverLetter && (
+                <p className="text-danger">{errors.coverLetter.message}</p>
               )}
 
-              <label className="mt-3" htmlFor="email">
-                Contact Number
+
+              <label className="mt-3" htmlFor="expectedSalary">
+                Expected Salary
               </label>
               <input
                 type="number"
-                id="number"
-                placeholder="Enter your contact number"
+                id="expectedSalary"
+                placeholder="Add your demanded salary"
                 className="form-control mt-3"
-                {...register("contactNumber", { valueAsNumber: true })}
+                {...register("expectedSalary", { valueAsNumber: true })}
               />
-              {errors.contactNumber && (
-                <p className="text-danger">{errors.contactNumber.message}</p>
+              {errors.expectedSalary && (
+                <p className="text-danger">{errors.expectedSalary.message}</p>
               )}
 
-             <label className="form-label fw-semibold mt-3">
-                Application Closing Date *
+              
+              <label className="mt-3" htmlFor="expectedSalary">
+                phone 
               </label>
               <input
-                {...register("dateofBirth")}
-                type="date"
-                className="form-control mt-2"
-              ></input>
+                type="number"
+                id="phone"
+                placeholder="Add your phone number"
+                className="form-control mt-3"
+                {...register("phone")}
+              />
+              {errors.phone && (
+                <p className="text-danger">{errors.phone.message}</p>
+              )}
 
+
+
+
+              
+              <label className="mt-3" htmlFor="expectedSalary">
+                Date of Birth 
+              </label>
+              <input
+                type="date"
+                id="dateofBirth"
+                placeholder="Add your demanded salary"
+                className="form-control mt-3"
+                {...register("dateofBirth")}
+              />
               {errors.dateofBirth && (
                 <p className="text-danger">{errors.dateofBirth.message}</p>
               )}
-
-              <label className="mt-3" htmlFor="experience">
-                Experience (in years)
-              </label>
-              <input
-                type="number"
-                id="experience"
-                placeholder="Years of experience"
-                className="form-control mt-3"
-                {...register("experience", { valueAsNumber: true })}
-              />
-              {errors.experience && (
-                <p className="text-danger">{errors.experience.message}</p>
-              )}
-
-              <label className="mt-3" htmlFor="skills">
-                Skills
-              </label>
-              <input
-                type="text"
-                id="skills"
-                placeholder="Add your skills (comma separated)"
-                className="form-control mt-3"
-                {...register("skills")}
-              />
-              {errors.skills && (
-                <p className="text-danger">{errors.skills.message}</p>
-              )}
-
-              <label className="mt-3" htmlFor="skills">
-                Expected Sellery
-              </label>
-              <input
-                type="number"
-                id="salary"
-                placeholder="Add your demanded salary"
-                className="form-control mt-3"
-                {...register("skills")}
-              />
-              {errors.skills && (
-                <p className="text-danger">{errors.skills.message}</p>
-              )}
             </div>
-          </div>
 
-          <div
-            className="p-5"
-            style={{ height: "250px", width: "100%", background: "#f9f9f5" }}
-          >
-            <div className="p-4 rounded" style={{ background: "white" }}>
+            <div
+              className="p-4 rounded mb-4 border"
+              style={{
+                background: "white",
+                width: "100%",
+              }}
+            >
               <h1>Resume Upload</h1>
               <p>Provide your CV/Resume to complete the application</p>
               <label htmlFor="resume">Upload Resume</label>
@@ -169,28 +183,28 @@ function CreateApplication() {
                 {...register("resume")}
               />
             </div>
-          </div>
 
-          <div
-            className="d-flex gap-3 justify-content-end p-5 mb-5"
-            style={{ background: "#f9f9f5" }}
-          >
-            <button
-              type="submit"
-              style={{ height: "50px", width: "180px" }}
-              className="btn btn-primary"
+            <div
+              className="d-flex gap-3 justify-content-center p-4"
+              style={{ background: "transparent", width: "100%" }}
             >
-              Submit Application
-            </button>
-            <button
-              type="reset"
-              style={{ height: "50px", width: "130px" }}
-              className="btn btn-secondary"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
+              <button
+                type="submit"
+                style={{ height: "50px", width: "180px" }}
+                className="btn btn-primary"
+              >
+                Submit Application
+              </button>
+              <button
+                type="reset"
+                style={{ height: "50px", width: "180px" }}
+                className="btn btn-secondary"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </>
   );

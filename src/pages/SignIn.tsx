@@ -31,15 +31,23 @@ export default function SignIn() {
       const res = await api.post("/users/login", data);
       localStorage.setItem("accessToken", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
-
       if (res.data.user.role === "organization") {
-        if (res.data.isOrganizationComplete) {
+        if (res.data.isOrganizationInformationComplete) {
           navigate("/organization-dashboard");
         } else {
           navigate("/organization-information");
         }
-      } else {
-        navigate("/applicant-information");
+      }
+      
+      else if (res.data.user.role === "applicant") {
+        if (res.data.isApplicantInformationComplete)
+          navigate("/applicant-dashboard");
+        else {
+          navigate("/applicant-information");
+        }
+      }
+      else if(res.data.user.role === "admin") {
+        navigate("/all-organization")
       }
     } catch (error) {
       console.error("Signin error:", error);
@@ -105,8 +113,8 @@ export default function SignIn() {
                 SignIn
               </button>
 
-              <p className="mt-3 text-center">
-                Don't have an account? <a href="/sign-up">SignUp</a>
+              <p className="mt-3 text-center" style={{cursor:"pointer"}}>
+                Don't have an account? <span   onClick={() => navigate("/sign-up")}>SignUp</span>
               </p>
             </div>
           </form>

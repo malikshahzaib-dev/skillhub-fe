@@ -17,7 +17,7 @@ interface Job{
   jobLink:string,
   createdBy:string
 
-}
+}  
 
 const JobPage = () => {
   const navigate = useNavigate()  
@@ -31,7 +31,7 @@ const JobPage = () => {
 
     try{
         const res = await api.get("/job/job")
-         console.log("eror to fetch jobs",res.data)
+         console.log(" fetch jobs successfully",res.data)
          setJob(res.data.foundJobs)
 
       }catch (error) {
@@ -191,7 +191,7 @@ const JobPage = () => {
                         <p className="mt-3">responsibilities:{newJob.responsibilities}</p>
                         <p className="mt-3">skills:{newJob.skills}</p>
                         <p className="mt-3">benefits:{newJob.benefits}</p>
-                        <button onClick={() => navigate("/create-application")}  style={{height:"40px",width:"120px"}} className="btn btn-primary">Apply</button>
+                        <button onClick={() => navigate(`/job/${newJob._id}`)}  style={{height:"40px",width:"120px",background:"black"}} className="btn btn-primary">View Detail</button>
                         </li>
                         </div>
                       </li>

@@ -42,6 +42,7 @@ function SignUp() {
       const res = await api.post("/users/sign-up", data);
       console.log("Signup successful:", res.data);
       localStorage.setItem("user",JSON.stringify(res.data.user))
+       localStorage.setItem("accessToken", res.data.token);
       navigate("/applicant-information");
     } catch (error: any) {
       console.error("Signup error:", error);
@@ -135,8 +136,8 @@ function SignUp() {
           </button>
         </form>
 
-        <p className="text-center mt-4">
-          Already have an account? <a href="/sign-in">SignIn</a>
+        <p className="text-center mt-4" style={{cursor:"pointer"}}>
+          Already have an account? <span onClick={() => navigate("/sign-in")}>SignIn</span>
         </p>
       </div>
     </div>

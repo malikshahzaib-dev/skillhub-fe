@@ -1,70 +1,167 @@
 import { useNavigate } from "react-router-dom";
+import NavBar from "./NavbarComponent";
 
-const ApplicantDashboard = () => {
-    const navigate = useNavigate()
-    return (
-        <>
-            <div style={{ height: "100vh", width: "100%", backgroundColor: "#f9f9f5" }}>
-                <div className="d-flex justify-content-around" style={{ width: "100%", backgroundColor: "lightgrey" }}>
-                    <div style={{ height: "110px", width: "100%", backgroundColor: "grey" }}
-                        className="d-flex justify-content-between align-items-center p-5">
+export default function ApplicantDashboard() {
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+    console.log("user",user)
 
-                        <h1>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="yellow" viewBox="0 0 24 24">
-                                <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 
-                                         15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                            </svg>
-                        </h1>
+const handleClik = (path:string) => {
+  if(!user){
+    navigate("/sign-in")
+  }else{
+    navigate(path)
+  }
+}
+ 
 
-                        <div className="d-flex justify-content-center gap-5">
-                            <div>
-                                <h1 className="text-center text-white">Dashboard</h1>
-                            </div>
-                            <div>
-                                <h1 className="text-center text-white">Jobs</h1>
-                            </div>
-                            <div>
-                                <h1 className="text-center text-white">My Applications</h1>
-                            </div>
-                            <div>
-                                <h1 className="text-center text-white">Profile</h1>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  return (
+    <>
+      {/* <div
+        className="d-flex justify-content-between align-items-center p-5"
+        style={{
+          height: "100px",
+          width: "100%",
+          background: "grey",
+          position: "fixed",
+          top: 0,
+          left: 0,
+        }}
+      >
+        <div className="d-flex gap-4">
+          <h1>📁</h1>
+          <h1 className="fs-24 fw-bold" style={{ color: "white" }}>
+            JobPortal
+          </h1>
+        </div>
 
-                <div>
-                    <h1 className="text-center p-3 mt-4 fs-1 fw-bold">Applicant Dashboard</h1>
-                    <p className="text-center fs-1 fw-semibold"
-                        style={{ paddingLeft: "200px", paddingRight: "200px" }}>
-                        Welcome to your applicant dashboard. Here you can explore job postings,
-                        apply for jobs, and track the status of your applications — all in one place.
-                    </p>
-                </div>
+        <div
+          className="d-flex gap-4 align-items-center"
+          style={{ position: "relative" }}
+        >
+          <button
+            onClick={() => navigate("/jobs")}
+            className="btn"
+            style={{ width: "120px", height: "40px", background: "white" }}
+          >
+            All Jobs
+          </button>
 
+          <button
+            onClick={() => navigate("/my-jobapplied")}
+            className="btn"
+            style={{ width: "160px", height: "40px", background: "white" }}
+          >
+            My Applied Jobs
+          </button>
 
-                <div className="d-flex gap-4 justify-content-center align-items-center">
-                    <div className="text-center p-5">
-                            <button  onClick={() => navigate("/job-page")} className="btn btn-primary" style={{ height: "50px", width: "200px" }}>
-                                Browse Jobs
-                            </button>
-                    </div>
+          <div
+            style={{
+              width: "35px",
+              height: "35px",
+              borderRadius: "50%",
+              border: "1px solid",
+              position: "relative",
+            }}
+          >
+            <img
+              src="https://i.pravatar.cc/150?img=3"
+              alt="profile"
+              style={{
+                width: "35px",
+                height: "35px",
+                borderRadius: "50%",
+                cursor: "pointer",
+              }}
+              onClick={() => setShowLogOut(!showLogOut)}
+            />
+          </div>
 
-                    <div className="text-center p-5">
-                            <button onClick={() => navigate("/my-application")} className="btn btn-secondary" style={{ height: "50px", width: "200px" }}>
-                                My Applications
-                            </button>
-                    </div>
-
-                    <div className="text-center p-5">
-                            <button onClick={() => navigate("/my-profile")} className="btn btn-success" style={{ height: "50px", width: "200px" }}>
-                                Update Profile
-                            </button>
-                    </div>
-                </div>
+          {showLogOut && (
+            <div
+              className="rounded d-flex justify-content-center align-items-center"
+              style={{
+                height: "110px",
+                width: "160px",
+                background: "white",
+                textAlign: "center",
+                position: "absolute",
+                top: "60px",
+                right: 0,
+              }}
+            >
+              <button
+                className="rounded"
+                onClick={handleLogOut}
+                style={{
+                  height: "34px",
+                  width: "100px",
+                  background: "black",
+                  color: "white",
+                  cursor: "pointer",
+                }}
+              >
+                Logout
+              </button>
             </div>
-        </>
-    );
-};
+          )}
+        </div>
+      </div> */}
+      <NavBar/>
+    
 
-export default ApplicantDashboard;
+      <div
+        style={{
+          width: "100%",
+          // marginTop: "110px",
+          backgroundColor: "#f9f9f5",
+        }}
+      >
+        <h1 className="text-center p-3 mt-4 fs-1 fw-bold">
+          Applicant Dashboard
+        </h1>
+        <p
+          className="text-center fs-1 fw-semibold"
+          style={{ paddingLeft: "200px", paddingRight: "200px" }}
+        >
+          Welcome to your applicant dashboard. Here you can explore job
+          postings, apply for jobs, and track the status of your applications —
+          all in one place.
+        </p>
+
+        <div className="d-flex gap-4 justify-content-center align-items-center">
+          <div className="text-center p-5">
+            <button
+              onClick={() => handleClik("/jobs")}
+              className="btn btn-primary"
+              style={{ height: "50px", width: "200px", background: "black" }}
+            >
+              Browse Jobs
+            </button>
+          </div>
+
+          <div className="text-center p-5">
+            <button
+              onClick={() => handleClik("/my-jobapplied")}
+              className="btn btn-secondary"
+              style={{ height: "50px", width: "200px", background: "black" }}
+            >
+              My Applications
+            </button>
+          </div>
+
+          <div className="text-center p-5">
+            <button
+              onClick={() => navigate(`/update-applicantinformation/${user._id}`)}
+              className="btn btn-success"
+              style={{ height: "50px", width: "200px" }}
+            >
+              Update Profile
+            </button>
+          </div>
+        </div>
+      </div>
+      
+    </>
+  );
+}

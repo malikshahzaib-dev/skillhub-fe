@@ -41,6 +41,8 @@ function SignUp() {
     try {
       const res = await api.post("/users/sign-up", data);
       console.log("Signup successful:", res.data);
+      localStorage.setItem("user",JSON.stringify(res.data.user))
+      localStorage.setItem("accessToken",res.data.accessToken)
       navigate("/organization-information");
     } catch (error: any) {
       console.error("Signup error:", error);
@@ -50,18 +52,18 @@ function SignUp() {
   return (
     <>
    <div style={{background:"#f9f9f5"}}>
-     <div className="text-center mb-2 mt-5" style={{background:"#f9f9f5"}}>
+     <div className="text-center p-3 " style={{background:"#f9f9f5"}}>
           <h1 style={{ fontSize: "32px" }}>📁</h1>
           <h4 className="mt-2 fs-24 fw-bold">Employers Portal</h4>
         </div>
 
-        <h3 className="text-center mb-2 fs-32 fw-bold mt-2">Create Account</h3>
+        <h3 className="text-center mb-2 fs-32 fw-bold ">Create Account</h3>
         <p className="text-center  fs-8 p-4">
            Join thousands of companies hiring top talent. Create your employer account today  <br />and start posting jobs to find the perfect candidates for your organization.
         </p>
         </div>
     <div
-      className="d-flex justify-content-center align-items-center p-4"
+      className="d-flex justify-content-center align-items-center  "
       style={{ height: "100%", backgroundColor: "#f9f9f5" }}
     >
       <div className="border p-5 rounded" style={{ width: "500px", background: "#f9f9f5" }}>
@@ -130,8 +132,8 @@ function SignUp() {
           </button>
         </form>
 
-        <p className="text-center mt-4">
-          Already have an account? <a href="/sign-in">SignIn</a>
+        <p className="text-center mt-4" style={{cursor:"pointer"}}>
+          Already have an account? <span  onClick={() => navigate("/sign-in")} >SignIn</span> 
         </p>
       </div>
     </div>

@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import api from "../config/api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
+import NavBar from "./NavbarComponent";
 
 const jobSchema = z.object({
   jobTitle: z
@@ -71,7 +72,7 @@ function CreateJob() {
   const benefitsHandler = (benefit: string) => {
     setBenefits([...benefits, benefit]);
     console.log(benefit, "benefits");
-  };
+  };  
 
   const responsibilitiesHandler = (responsibility: string) => {
     setResponsibilities([...responsibilities, responsibility]);
@@ -80,7 +81,7 @@ function CreateJob() {
 
   async function getOrganizationDetails() {
     try {
-      const res = await api.get(`/organization/user/${user._id}`);
+      const res = await api.get(`/organization/users/${user._id}`);
       console.log("Organization details:", res.data);
       setOrganizationId(res.data._id);
       console.log("Organization details:", res.data);
@@ -98,7 +99,7 @@ function CreateJob() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors },reset
   } = useForm<JobInput>({
     resolver: zodResolver(jobSchema),
     defaultValues: {
@@ -126,17 +127,26 @@ function CreateJob() {
     requirements,
     responsibilities,
     benefits,
+    createdBy:user._id
     // createdBy: user._id,
   };
     console.log("Form data to be submitted:", payload  );
     try {
       const res = await api.post(`/job/${organizationId}`, payload);
       console.log("Job created successfully:", res.data);
-      navigate("/job-page", {
+      reset();
+      setRequirements([])
+      setResponsibilities([])
+      setBenefits([])
+      setNewRequirements("")
+      setNewResponsibilities("")
+      setNewBenefits("")
+      navigate("/jobs", {
         state: {
           newJob: [res.data],
           createdBy: user._id,  
         },
+        
       });
     } catch (error) {
       console.error("Error creating job:", error);
@@ -145,6 +155,10 @@ function CreateJob() {
 
   return (
     <>
+     <NavBar/>
+    
+
+
       <div style={{ background: "#f9f9f5", minHeight: "100vh" }}>
         <div>
           <h1
@@ -326,16 +340,14 @@ function CreateJob() {
               </button>
             </div>
           </div>
+         
 
           <div className="d-flex justify-content-center mt-5">
             <div
               className="p-4 rounded"
               style={{ width: "900px", background: "#ffffff" }}
             >
-              <h1 className="fs-8">Compensation & Benefits</h1>
-              <p style={{ fontSize: "20px" }}>
-                Salary range and perks for the position
-              </p>
+               
 
               <div className="d-flex gap-4">
                 <div style={{ width: "50%" }}>
@@ -387,7 +399,7 @@ function CreateJob() {
                 >
                   add benefits
                 </button>
-              </div>
+              </div>     
 
               {/* {errors.benefits && (
                 <p className="text-danger">{errors.benefits.message}</p>
