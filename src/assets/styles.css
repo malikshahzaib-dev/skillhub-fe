@@ -1,0 +1,321 @@
+/* Custom styles for HomePage */
+
+/* Existing styles... */
+
+.hero-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+}
+
+.card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stat-item {
+  padding: 20px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+  margin-bottom: 20px;
+}
+
+.stat-item h2 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.footer-gradient {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+}
+
+.btn-custom {
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+  border: none;
+  color: white;
+}
+
+.btn-custom:hover {
+  background: linear-gradient(135deg, #fecfef 0%, #ff9a9e 100%);
+  color: white;
+}
+
+/* Jobs page styles */
+.jobs-hero {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 60px 0;
+  color: white;
+}
+
+.search-container {
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 50px 12px 20px;
+  border: none;
+  border-radius: 25px;
+  font-size: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.search-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #666;
+}
+
+.job-card {
+  background: white;
+  border: none;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.job-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.job-title {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.job-badge {
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 20px;
+}
+
+.salary-badge {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+/* Applied Jobs styles */
+.applied-jobs-hero {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 60px 0;
+  color: white;
+}
+
+.application-card {
+  background: white;
+  border: none;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  height: 100%;
+}
+
+.application-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.status-badge {
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 20px;
+}
+
+.status-pending { background: #fff3cd; color: #856404; }
+.status-approved { background: #d1ecf1; color: #0c5460; }
+.status-rejected { background: #f8d7da; color: #721c24; }
+
+.salary-badge {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+}
+
+.action-dropdown .dropdown-menu {
+  border: none;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Dashboard styles */
+.dashboard-hero {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 80px 0;
+  color: white;
+  text-align: center;
+}
+
+.dashboard-card {
+  background: white;
+  border: none;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  height: 100%;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  color: #4facfe;
+}
+
+.dashboard-btn {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  border: none;
+  padding: 12px 30px;
+  border-radius: 25px;
+  font-weight: 600;
+  transition: transform 0.3s ease;
+}
+
+.dashboard-btn:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+}
+
+/* SignIn styles */
+.signin-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.signin-card {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-width: 900px;
+  width: 100%;
+}
+
+.signin-left {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  color: white;
+  padding: 60px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.signin-right {
+  padding: 60px 40px;
+}
+
+.signin-logo {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.signin-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.signin-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-bottom: 30px;
+}
+
+.form-floating {
+  margin-bottom: 20px;
+}
+
+.form-control {
+  border: none;
+  border-bottom: 2px solid #e9ecef;
+  border-radius: 0;
+  padding: 12px 0;
+  transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+  border-bottom-color: #4facfe;
+  box-shadow: none;
+}
+
+.btn-signin {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  border: none;
+  padding: 12px;
+  border-radius: 25px;
+  font-weight: 600;
+  transition: transform 0.3s ease;
+}
+
+.btn-signin:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+}
+
+.forgot-link {
+  color: #4facfe;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+.signup-link {
+  color: #6c757d;
+  text-decoration: none;
+}
+
+.signup-link span {
+  color: #4facfe;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.signup-link span:hover {
+  text-decoration: underline;
+}
+
+/* .example-btn{
+   background: linear-gradient(to right, blue, green,red,yellow);
+}
+.example-btn:hover{
+     background: linear-gradient(to right, orange, green,red,yellow);
+} */
+
+
+.cursor-pointer {
+  cursor: pointer;
+}

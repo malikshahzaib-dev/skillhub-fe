@@ -3,29 +3,45 @@ import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
+import "../assets/styles.css"; 
+import { useAuth } from "../config/AuthProvider";
 
 const signUpSchema = z
   .object({
-    firstName: z.string().min(2, "First name must be at least 2 characters").max(50),
-    lastName: z.string().min(2, "Last name must be at least 2 characters").max(50),
+    firstName: z
+      .string()
+      .min(2, "First name must be at least 2 characters")
+      .max(50),
+    lastName: z
+      .string()
+      .min(2, "Last name must be at least 2 characters")
+      .max(50),
     email: z.email("Invalid email address"),
-    role: z.enum([ "organization"]),
-    password: z.string().min(8, "Password must be at least 8 characters").max(100),
-    confirmPassword: z.string().min(8, "Confirm password must be at least 8 characters").max(100),
+    role: z.enum(["organization"]),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .max(100),
+    confirmPassword: z
+      .string()
+      .min(8, "Confirm password must be at least 8 characters")
+      .max(100),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });
 
-
 type SignUpInput = z.infer<typeof signUpSchema>;
-
-function SignUp() {
+export default function SignUp() {
   const navigate = useNavigate();
+  const { setToken, setUser } = useAuth();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<SignUpInput>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
       firstName: "",
@@ -40,105 +56,143 @@ function SignUp() {
   const signUp = async (data: SignUpInput) => {
     try {
       const res = await api.post("/users/sign-up", data);
-      console.log("Signup successful:", res.data);
-      localStorage.setItem("user",JSON.stringify(res.data.user))
-      localStorage.setItem("accessToken",res.data.accessToken)
+      setUser(res.data.user);
+      setToken(res.data.token);
       navigate("/organization-information");
     } catch (error: any) {
-      console.error("Signup error:", error);
+      console.error("Signup error:", error.response?.data || error.message);
     }
   };
 
   return (
-    <>
-   <div style={{background:"#f9f9f5"}}>
-     <div className="text-center p-3 " style={{background:"#f9f9f5"}}>
-          <h1 style={{ fontSize: "32px" }}>📁</h1>
-          <h4 className="mt-2 fs-24 fw-bold">Employers Portal</h4>
+    <div className="signin-container">
+      <div className="signin-card row g-0">
+        {/* LEFT SIDE */}
+        <div className="col-lg-6 signin-left d-none d-lg-flex">
+          <div>
+            <div className="signin-logo">🏢</div>
+            <h1 className="signin-title">Employer Portal</h1>
+            <p className="signin-subtitle">
+              Create your organization account and start hiring top talent. Post
+              jobs, manage applications, and grow your team with JobPortal.
+            </p>
+
+            <div className="mt-4">
+              <p className="mb-2">Already have an account?</p>
+              <button
+                className="btn btn-light btn-lg px-4"
+                onClick={() => navigate("/sign-in")}
+              >
+                Sign In
+              </button>
+            </div>
+          </div>
         </div>
 
-        <h3 className="text-center mb-2 fs-32 fw-bold ">Create Account</h3>
-        <p className="text-center  fs-8 p-4">
-           Join thousands of companies hiring top talent. Create your employer account today  <br />and start posting jobs to find the perfect candidates for your organization.
-        </p>
+        {/* RIGHT SIDE */}
+        <div className="col-lg-6 signin-right">
+          <div className="text-center mb-4">
+            <h2 className="fw-bold text-primary">Create Account</h2>
+            <p className="text-muted">
+              Register your organization to get started
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit(signUp)}>
+            <div className="row">
+              <div className="col-md-6">
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className={`form-control ${errors.firstName ? "is-invalid" : ""}`}
+                    placeholder="First Name"
+                    {...register("firstName")}
+                  />
+                  <label>First Name</label>
+                  {errors.firstName && (
+                    <div className="text-danger small mt-1">
+                      {errors.firstName.message}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="col-md-6">
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className={`form-control ${errors.lastName ? "is-invalid" : ""}`}
+                    placeholder="Last Name"
+                    {...register("lastName")}
+                  />
+                  <label>Last Name</label>
+                  {errors.lastName && (
+                    <div className="text-danger small mt-1">
+                      {errors.lastName.message}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="form-floating mb-3">
+              <input
+                type="email"
+                className={`form-control ${errors.email ? "is-invalid" : ""}`}
+                placeholder="Email"
+                {...register("email")}
+              />
+              <label>Email Address</label>
+              {errors.email && (
+                <div className="text-danger small mt-1">
+                  {errors.email.message}
+                </div>
+              )}
+            </div>
+
+            <div className="form-floating mb-3">
+              <input
+                type="password"
+                className={`form-control ${errors.password ? "is-invalid" : ""}`}
+                placeholder="Password"
+                {...register("password")}
+              />
+              <label>Password</label>
+              {errors.password && (
+                <div className="text-danger small mt-1">
+                  {errors.password.message}
+                </div>
+              )}
+            </div>
+
+            <div className="form-floating mb-4">
+              <input
+                type="password"
+                className={`form-control ${errors.confirmPassword ? "is-invalid" : ""}`}
+                placeholder="Confirm Password"
+                {...register("confirmPassword")}
+              />
+              <label>Confirm Password</label>
+              {errors.confirmPassword && (
+                <div className="text-danger small mt-1">
+                  {errors.confirmPassword.message}
+                </div>
+              )}
+            </div>
+
+            <button type="submit" className="btn btn-signin w-100 mb-3">
+              Create Account
+            </button>
+
+            <div className="text-center d-lg-none">
+              <p className="signup-link mb-0">
+                Already have an account?{" "}
+                <span onClick={() => navigate("/sign-in")}>Sign In</span>
+              </p>
+            </div>
+          </form>
         </div>
-    <div
-      className="d-flex justify-content-center align-items-center  "
-      style={{ height: "100%", backgroundColor: "#f9f9f5" }}
-    >
-      <div className="border p-5 rounded" style={{ width: "500px", background: "#f9f9f5" }}>
-       
-
-        <form onSubmit={handleSubmit(signUp)}>
-          <div>
-            <label className="form-label ">First Name</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Enter your first name"
-              {...register("firstName")}
-            />
-            {errors.firstName && <p className="text-danger">{errors.firstName.message}</p>}
-          </div>
-
-          <div>
-            <label className="form-label mt-2">Last Name</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Enter your last name"
-              {...register("lastName")}
-            />
-            {errors.lastName && <p className="text-danger">{errors.lastName.message}</p>}
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label mt-2">Email</label>
-            <input
-              type="email"
-              className="form-control"
-              placeholder="Enter your email"
-              {...register("email")}
-            />
-            {errors.email && <p className="text-danger">{errors.email.message}</p>}
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label mt-2">Password</label>
-            <input
-              type="password"
-              className="form-control"
-              placeholder="Enter password"
-              {...register("password")}
-            />
-            {errors.password && <p className="text-danger">{errors.password.message}</p>}
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Confirm Password</label>
-            <input
-              type="password"
-              className="form-control"
-              placeholder="Confirm password"
-              {...register("confirmPassword")}
-            />
-            {errors.confirmPassword && (
-              <p className="text-danger">{errors.confirmPassword.message}</p>
-            )}
-          </div>
-
-          <button type="submit" className="btn btn-primary w-100 mt-3">
-            Sign Up
-          </button>
-        </form>
-
-        <p className="text-center mt-4" style={{cursor:"pointer"}}>
-          Already have an account? <span  onClick={() => navigate("/sign-in")} >SignIn</span> 
-        </p>
       </div>
     </div>
-    </>
   );
 }
-
-export default SignUp;

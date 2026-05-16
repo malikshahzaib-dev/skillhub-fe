@@ -1,75 +1,44 @@
 import { useEffect, useState } from "react";
 import api from "../config/api";
-import { useNavigate } from "react-router-dom";
+import {  useNavigate } from "react-router-dom";
 import NavBar from "./NavbarComponent";
-  
-declare global {
-  interface Window {
-    bootstrap: any;
-  }
-}
+import { useAuth } from "../config/AuthProvider";
 
-export default function AllOrganization() {
-  const navigate = useNavigate();
-  const [organizations, setOrganizations] = useState<any>([]);
+export default function MyOrganizations() {
+    const navigate = useNavigate()
+  const [organization, setOrganization] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
-  const [openDropdowns, setOpenDropdowns] = useState<Set<string>>(new Set());
-  
+   
+
+
+    const {user} = useAuth()
+   
+
   const fetchOrganization = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/organization");
-      console.log("found organization by super admin", res.data);
-      setOrganizations(res.data.foundAllOrganizations);
+      if(user?.role === "super admin"){
+        const res = await api.get("/organization")
+        console.log("found organization by super admin",res.data)
+        setOrganization(res.data.foundAllOrganizations || res.data);
+      }else if(user?.role === "organization"){
+        const res = await api.get(`/organization?admin=${user?._id}`);
+      console.log(" found organizations successfully", res.data);
+      setOrganization(res.data.foundOrganizations);
+      }
+     
     } catch (err: any) {
       console.error("error to fetch organizations");
     } finally {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    fetchOrganization()
+  }, []);
 
-  const updateStatus = async (organizationId: string, status: string) => {
-    try {
-      const res = await api.patch(`/organization/${organizationId}/status`, { status });
-      console.log("Organization status updated successfully", res.data);
-      fetchOrganization(); // Refresh the list
-    } catch (err: any) {
-      console.error("Error updating status", err);
-    }
-  };
-
-  const deleteOrganization = async (organizationId: string) => {
-    try {
-      const res = await api.delete(`/organization/${organizationId}`);
-      console.log("Organization deleted successfully", res.data);
-      fetchOrganization(); // Refresh the list
-    } catch (err: any) {
-      console.error("Error deleting organization", err);
-    }
-  };
-
-  const toggleDropdown = (organizationId: string) => {
-    setOpenDropdowns(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(organizationId)) {
-        newSet.delete(organizationId);
-      } else {
-        newSet.add(organizationId);
-      }
-      return newSet;
-    });
-  };
-
-  const closeDropdown = (organizationId: string) => {
-    setOpenDropdowns(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(organizationId);
-      return newSet;
-    });
-  };
-
-  const filteredOrganizations = organizations.filter((org: any) =>
+  const filteredOrganizations = organization.filter((org: any) =>
     org.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     org.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -84,25 +53,10 @@ export default function AllOrganization() {
     }
   };
 
-  useEffect(() => {
-    fetchOrganization()
-    ;
-    
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      if (!target.closest('.dropdown')) {
-        setOpenDropdowns(new Set());
-      }
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
-
   return (
     <>
       <NavBar />
-      <div style={{ background: "#f8f9fa", marginTop:"30px", minHeight: "100vh" }}>
+      <div style={{ background: "#f8f9fa", minHeight: "100vh" }}>
         {/* Hero Section */}
         <div className="hero-section text-white py-5" style={{
           background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
@@ -112,20 +66,20 @@ export default function AllOrganization() {
             <div className="row align-items-center">
               <div className="col-lg-8">
                 <h1 className="display-4 fw-bold mb-3">
-                  <i className="bi bi-building me-3"></i>All Organizations
+                  <i className="bi bi-building me-3"></i>My Organizations
                 </h1>
                 <p className="lead mb-4">
-                  Manage and oversee all registered organizations in the system.
-                  Review applications, update statuses, and maintain the platform ecosystem.
+                  Manage and oversee the organizations you administer.
+                  Create jobs, update information, and track your organizational activities.
                 </p>
                 <div className="d-flex align-items-center">
                   <div className="bg-white bg-opacity-20 rounded-pill px-3 py-2 me-3">
-                    <i className="bi bi-check-circle-fill text-success me-2"></i>
-                    <span className="fw-semibold">{organizations.length} Organizations</span>
+                    <i className="bi bi-building-fill text-success me-2"></i>
+                    <span className="fw-semibold">{organization.length} Organizations</span>
                   </div>
                   <div className="bg-white bg-opacity-20 rounded-pill px-3 py-2">
-                    <i className="bi bi-graph-up text-info me-2"></i>
-                    <span className="fw-semibold">Active Management</span>
+                    <i className="bi bi-briefcase text-info me-2"></i>
+                    <span className="fw-semibold">Job Management</span>
                   </div>
                 </div>
               </div>
@@ -138,7 +92,7 @@ export default function AllOrganization() {
           </div>
         </div>
 
-        {/* Search and Stats Section */}
+        {/* Search and Actions Section */}
         <div className="container-fluid py-4">
           <div className="row justify-content-center">
             <div className="col-12 col-lg-10 col-xl-8">
@@ -170,15 +124,14 @@ export default function AllOrganization() {
                       </div>
                     </div>
                     <div className="col-md-4 text-md-end mt-3 mt-md-0">
-                      <div className="d-flex justify-content-md-end align-items-center gap-3">
-                        <div className="text-muted small">
-                          <i className="bi bi-funnel-fill me-1"></i>
-                          Filter Results
-                        </div>
-                        <span className="badge bg-primary fs-6">
-                          {filteredOrganizations.length} Results
-                        </span>
-                      </div>
+                      <button
+                        onClick={() => navigate("/create-job")}
+                        className="btn btn-primary btn-lg"
+                        disabled={user?.role !== "organization"}
+                      >
+                        <i className="bi bi-plus-circle me-2"></i>
+                        Create Job
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -204,14 +157,14 @@ export default function AllOrganization() {
                     <i className="bi bi-building-x display-1 text-muted mb-3"></i>
                     <h3 className="text-muted">No Organizations Found</h3>
                     <p className="text-muted">
-                      {searchTerm ? "Try adjusting your search terms" : "No organizations have been registered yet"}
+                      {searchTerm ? "Try adjusting your search terms" : "No organizations available"}
                     </p>
                   </div>
                 </div>
               ) : (
                 <div className="row g-4">
-                  {filteredOrganizations.map((organization: any, ind: any) => (
-                    <div key={organization._id || ind} className="col-12 col-md-6 col-lg-4">
+                  {filteredOrganizations.map((org: any, ind: any) => (
+                    <div key={org._id || ind} className="col-12 col-md-6 col-lg-4">
                       <div className="card h-100 shadow-sm hover-card position-relative" style={{
                         transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
                         cursor: "pointer"
@@ -224,75 +177,12 @@ export default function AllOrganization() {
                               </div>
                               <div>
                                 <h5 className="card-title mb-1 fw-bold text-truncate" style={{ maxWidth: "200px" }}>
-                                  {organization.name}
+                                  {org.name}
                                 </h5>
-                                <span className={`badge ${getStatusBadgeClass(organization.status)} fs-6`}>
-                                  {organization.status}
+                                <span className={`badge ${getStatusBadgeClass(org.status)} fs-6`}>
+                                  {org.status}
                                 </span>
                               </div>
-                            </div>
-                            <div className="dropdown position-relative">
-                              <button
-                                className="btn btn-sm  btn-outline-secondary"
-                                type="button"
-                                style={{borderRadius:"120px"}}
-                                onClick={() => toggleDropdown(organization._id)}
-                              >
-                                <i className="bi bi-three-dots-vertical"></i>
-                              </button>
-                              {openDropdowns.has(organization._id) && (
-                                <ul className="dropdown-menu show position-absolute end-0 mt-1 shadow" style={{ zIndex: 1050 }}>
-                                  <li>
-                                    <button
-                                      className="dropdown-item text-success d-flex align-items-center"
-                                      onClick={() => {
-                                        updateStatus(organization._id, 'approved');
-                                        closeDropdown(organization._id);
-                                      }}
-                                    >
-                                      <i className="bi bi-check-circle me-2"></i>
-                                      <span>Approve</span>
-                                    </button>
-                                  </li>
-                                  <li>
-                                    <button
-                                      className="dropdown-item text-danger d-flex align-items-center"
-                                      onClick={() => {
-                                        updateStatus(organization._id, 'reject');
-                                        closeDropdown(organization._id);
-                                      }}
-                                    >
-                                      <i className="bi bi-x-circle me-2"></i>
-                                      <span>Reject</span>
-                                    </button>
-                                  </li>
-                                  <li><hr className="dropdown-divider" /></li>
-                                  <li>
-                                    <button
-                                      className="dropdown-item text-warning d-flex align-items-center"
-                                      onClick={() => {
-                                        updateStatus(organization._id, 'block');
-                                        closeDropdown(organization._id);
-                                      }}
-                                    >
-                                      <i className="bi bi-shield-x me-2"></i>
-                                      <span>Block</span>
-                                    </button>
-                                  </li>
-                                  <li>
-                                    <button
-                                      className="dropdown-item text-info d-flex align-items-center"
-                                      onClick={() => {
-                                        updateStatus(organization._id, 'unBlock');
-                                        closeDropdown(organization._id);
-                                      }}
-                                    >
-                                      <i className="bi bi-shield-check me-2"></i>
-                                      <span>Unblock</span>
-                                    </button>
-                                  </li>
-                                </ul>
-                              )}
                             </div>
                           </div>
                         </div>
@@ -304,7 +194,7 @@ export default function AllOrganization() {
                             WebkitBoxOrient: "vertical",
                             overflow: "hidden"
                           }}>
-                            {organization.description}
+                            {org.description}
                           </p>
 
                           <div className="row g-2 mb-3">
@@ -317,7 +207,7 @@ export default function AllOrganization() {
                             <div className="col-6">
                               <div className="d-flex align-items-center text-muted small">
                                 <i className="bi bi-calendar-event me-2 text-primary"></i>
-                                <span>{new Date(organization.createdAt).toLocaleDateString()}</span>
+                                <span>{new Date(org.createdAt).toLocaleDateString()}</span>
                               </div>
                             </div>
                           </div>
@@ -326,16 +216,16 @@ export default function AllOrganization() {
                         <div className="card-footer bg-light border-top-0">
                           <div className="d-flex gap-2">
                             <button
-                              onClick={() => navigate(`/organization/${organization._id}`)}
+                              onClick={() => navigate(`/organization/${org._id}`)}
                               className="btn btn-primary flex-fill"
                             >
                               <i className="bi bi-eye me-1"></i>View Details
                             </button>
                             <button
-                              onClick={() => deleteOrganization(organization._id)}
-                              className="btn btn-outline-danger"
+                              onClick={() => navigate(`/update-organization/${org._id}`)}
+                              className="btn btn-outline-primary flex-fill"
                             >
-                              <i className="bi bi-trash"></i>
+                              <i className="bi bi-pencil me-1"></i>Update
                             </button>
                           </div>
                         </div>
@@ -401,20 +291,6 @@ export default function AllOrganization() {
         .form-control {
           border-radius: 0 8px 8px 0 !important;
           border-left: none !important;
-        }
-
-        .dropdown-menu {
-          z-index: 1050 !important;
-          box-shadow: 0 4px 20px rgba(0,0,0,0.15) !important;
-        }
-
-        .dropdown-item {
-          padding: 0.5rem 1rem !important;
-          transition: background-color 0.2s ease !important;
-        }
-
-        .dropdown-item:hover {
-          background-color: rgba(0,0,0,0.05) !important;
         }
       `}</style>
     </>

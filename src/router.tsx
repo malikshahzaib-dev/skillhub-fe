@@ -17,10 +17,10 @@ import JobPage from "./pages/JobPage";
 import ApplicantInformation from "./pages/ApplicantInformation";
 import UpdateJob from "./pages/UpdateJob";
 import Jobs from "./pages/Jobs";
-import JobDetaill from "./pages/JobDetaill";
+import JobDetaill from "./pages/JobDetail";
 import MyAppliedJob from "./pages/myAppliedJob";
 import MyJobs from "./pages/MyJobs";
-import MyOrganizations from "./pages/MyOrganizations";
+import MyOrganizations from "./pages/MyOrganization";
 import UpdateOrganization from "./pages/UpdateOrganization";
 import OrganizationDetail from "./pages/OrganizationDetail";
 import NavBar from "./pages/NavbarComponent";
@@ -28,29 +28,29 @@ import UpdateApplicantInformation from "./pages/UpdateApplicantInformation";
 import Application from "./pages/Application";
 import AllOrganization from "./pages/AllOrganizations";
 import MyApplication from "./pages/MyApplication";
-import FileUpload from "./pages/FileUpload";
 import ApplicationDetail from "./pages/ApplicationDetail";
-
-
+import ChatList from "./pages/ChatList";
+// import Sami from "./pages/Sami";
 export const router = createBrowserRouter([
+  
   {
     path: "/",
     element: <HomePage />,
   },
-   {
+  {
     path: "/sign-in",
     element: <SignIn />,
   },
-   {
+  {
     path: "/sign-up",
     element: <SignUp />,
-  },  
+  },
 
   {
     path: "/employer-signup",
     element: <EmployerSignUp />,
   },
- 
+
   {
     path: "/forgot-password",
     element: <ForgotPassword />,
@@ -59,51 +59,46 @@ export const router = createBrowserRouter([
     path: "/verify-otp",
     element: <VerifyOtp />,
   },
-   {
+  {
     path: "/reset-password",
     element: <ResetPassword />,
   },
-   
+
   {
     path: "/applicant-information",
     element: <ApplicantInformation />,
   },
- 
+
   {
     path: "/applicant-dashboard",
     element: <ApplicantDashboard />,
   },
-   {
+  {
     path: "/create-application/:jobId",
     element: <CreateApplication />,
   },
-   {
+  {
     path: "/organization-information",
     element: <OrganizationInformation />,
   },
-  // { path:"/application/:id" ,element:<CreateOrUpdateApplication />}
 
-
-   {
+  {
     path: "/organization-dashboard",
-    element: <OrganizationDashboard/>,
+    element: <OrganizationDashboard />,
   },
   {
     path: "/create-job",
     element: <CreateJob />,
   },
- 
+
   {
     path: "/update-application/:id",
     element: <UpdateApplication />,
   },
   {
-    path:"/my-application/:jobId",
-    element:<MyApplication/>
+    path: "/my-application/:jobId",
+    element: <MyApplication />,
   },
-  
-  
-
 
   {
     path: "/job-list",
@@ -114,8 +109,7 @@ export const router = createBrowserRouter([
     path: "/job-page",
     element: <JobPage />,
   },
- 
-  
+
   {
     path: "/update-job/:jobId",
     element: <UpdateJob />,
@@ -125,9 +119,8 @@ export const router = createBrowserRouter([
     element: <Jobs />,
   },
   {
-    path:"/my-jobs",
-    element:<MyJobs/>
-
+    path: "/my-jobs",
+    element: <MyJobs />,
   },
   {
     path: "/job/:jobId",
@@ -136,34 +129,46 @@ export const router = createBrowserRouter([
   {
     path: "/my-jobapplied",
     element: <MyAppliedJob />,
-  },{
-    path:"/my-organization",
-    element:<MyOrganizations/>
-  },{
-    path:"/update-organization/:id",
-    element:<UpdateOrganization/>
-  },{
-    path:"organization/:id",
-    element:<OrganizationDetail/>
-  },{
-    path:"/navBar",
-    element:<NavBar/>
-  },{
-    path:"/update-applicantinformation/:id",
-    element:<UpdateApplicantInformation/>
   },
   {
-    path:"/all-application",
-    element:<Application/>
-  },{
-    path:"/all-organization",
-    element:<AllOrganization/>
-  },{
-    path:"/file-upload",
-    element:<FileUpload/>
-  },{
-    path:"/application-detail/:id",
-    element:<ApplicationDetail/>
-  }
- 
+    path: "/my-organization",
+    element: <MyOrganizations />,
+  },
+  {
+    path: "/update-organization/:id",
+    element: <UpdateOrganization />,
+  },
+  {
+    path: "organization/:id",
+    element: <OrganizationDetail />,
+  },
+  {
+    path: "/navBar",
+    element: <NavBar />,
+  },
+  {
+    path: "/update-applicantinformation/:id",
+    element: <UpdateApplicantInformation />,
+  },
+  {
+    path: "/all-application",
+    element: <Application />,
+  },
+  {
+    path: "/all-organization",
+    element: <AllOrganization />,
+  },
+  // {
+  //   path: "/compressor",
+  //   element: <Compressor />,
+  // },
+  {
+    path: "/application-detail/:id",
+    element: <ApplicationDetail />,
+  },
+  {
+    path: "/chatlist",
+    element: <ChatList />,
+  },
+
 ]);

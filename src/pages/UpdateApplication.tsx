@@ -2,146 +2,143 @@ import { useEffect, useState } from "react";
 import api from "../config/api";
 import { useNavigate, useParams } from "react-router-dom";
 import NavBar from "./NavbarComponent";
+import { useAuth } from "../config/AuthProvider";
 
 const UpdateApplication = () => {
-  const navigate = useNavigate()
-  const [application,setApplication] = useState<any>({})
-  const [coverLetter,setCoverLetter] = useState("")
-  const [expectedSalary,setExpectedSalary] = useState("")
-  const {id} = useParams()
-  
+  const navigate = useNavigate();
+  const [application, setApplication] = useState<any>({});
+  const [coverLetter, setCoverLetter] = useState("");
+  const [expectedSalary, setExpectedSalary] = useState("");
+  const {user} = useAuth()
+  const { id } = useParams();
 
-  const fetchApplication = async() => {
+  const fetchApplication = async () => {
     try {
-      const res = await api.get(`/application/${id}`)
-      console.log("fetch application successfully",res.data)
-      setApplication(res.data)
-      setCoverLetter(res.data.coverLetter)
-      setExpectedSalary(res.data.expectedSalary)
-    }catch(err:any){
-      console.error("error to fetch applicatioin")
+      const res = await api.get(`/application/${id}`);
+      setApplication(res.data);
+      setCoverLetter(res.data.coverLetter);
+      setExpectedSalary(res.data.expectedSalary);
+    } catch (err: any) {
+      console.error("error to fetch application");
     }
-  }
+  };
 
-
-
-
-
-  useEffect(()=> {
+  useEffect(() => {
     fetchApplication()
-  },[id])
+    if(!user) navigate("/sign-in");
+  }, [id]);
 
-  const updateApplication = async(e:any) => {
-    e.preventDefault()
-    try{
-      const payLoad = {
-        
-        coverLetter,
-        expectedSalary
-      }
-      const res = await api.patch(`/application/${id}`,payLoad)
-      console.log("application updated successfully",res.data)
-      navigate("/my-jobapplied")
-    }catch(err:any){
-      console.error("error to update application")
+  const updateApplication = async (e: any) => {
+    e.preventDefault();
+    try {
+      const payLoad = { coverLetter, expectedSalary };
+      const res = await api.patch(`/application/${id}`, payLoad);
+      console.log("application updated successfully", res.data);
+      navigate("/my-jobapplied");
+    } catch (err: any) {
+      console.error("error to update application");
     }
-  }
-  
-  if(!application){
-    return <p>loading</p>
-  }
+  };
+
+  if (!application) return <p>Loading...</p>;
 
   return (
     <>
+      <NavBar />
 
-
-
-     <NavBar/>
-
-
-
-      <div  style={{ background: "#f9f9f5"  }}>
-        <div className="pb-3 pt-5">
-          <h1 className="text-center fs-48 fw-bold mt-2">Update Your Application</h1>
-          <p className="text-center mt-2">
-             Review your existing details and make necessary changes below.
+      <div style={{ background: "#f4f6f8" }}>
+        <div className="pb-3 pt-5 text-center">
+          <h1 className="fs-2 fw-bold mt-2" style={{ color: "#1c1c1c" }}>
+            Update Your Application
+          </h1>
+          <p className="mt-2 text-muted">
+            Review your existing details and make necessary changes below.
           </p>
         </div>
 
-        <div className=" d-flex justify-content-center">
+        <div className="d-flex justify-content-center mb-5">
           <form
             onSubmit={updateApplication}
-            style={{
-              background: "transparent",
-              width: "75%",
-              padding: "30px",
-            }}
-            className="border rounded-2 mb-5"
+            style={{ width: "75%" }}
           >
+            {/* Personal Info */}
             <div
-              className=" p-4 rounded mb-4 border"
-              style={{ background: "white", width: "100%" }}
+              className="p-5 rounded-4 shadow-sm mb-4"
+              style={{ background: "white", borderLeft: "5px solid #4b6cb7" }}
             >
-              <h1>Personal Information</h1>
-              <p>Review and update your application details below.</p>
+              <h3 className="fw-bold mb-3" style={{ color: "#4b6cb7" }}>
+                Personal Information
+              </h3>
+              <p className="text-muted mb-4">Review and update your application details below.</p>
 
-              <label htmlFor="fullName mt-2"> Cover Letter</label>
+              <label htmlFor="coverLetter" className="fw-semibold">
+                Cover Letter
+              </label>
               <textarea
-              value={coverLetter}
-              onChange={(e) => setCoverLetter(e.target.value)}
-                id="fullName"
+                value={coverLetter}
+                onChange={(e) => setCoverLetter(e.target.value)}
+                id="coverLetter"
                 placeholder="Enter your cover letter"
-                className="form-control mt-3"
+                className="form-control mt-2 shadow-sm"
+                style={{ minHeight: "100px", borderRadius: "0.5rem" }}
               ></textarea>
-           
 
-
-              <label className="mt-3" htmlFor="expectedSalary">
+              <label className="mt-4 fw-semibold" htmlFor="expectedSalary">
                 Expected Salary
               </label>
               <input
-              value={expectedSalary}
-              onChange={(e) => setExpectedSalary(e.target.value)}
+                value={expectedSalary}
+                onChange={(e) => setExpectedSalary(e.target.value)}
                 type="number"
                 id="expectedSalary"
                 placeholder="Add your demanded salary"
-                className="form-control mt-3"
+                className="form-control mt-2 shadow-sm"
+                style={{ borderRadius: "0.5rem" }}
               />
-             
             </div>
 
+            {/* Resume Upload */}
             <div
-              className="p-4 rounded mb-4 border"
-              style={{
-                background: "white",
-                width: "100%",
-              }}
+              className="p-5 rounded-4 shadow-sm mb-4"
+              style={{ background: "white", borderLeft: "5px solid #4b6cb7" }}
             >
-              <h1>Resume Upload</h1>
-              <p>Update or replace your CV/Resume if needed.</p>
-              <label htmlFor="resume">Upload Resume</label>
+              <h3 className="fw-bold mb-3" style={{ color: "#4b6cb7" }}>
+                Resume Upload
+              </h3>
+              <p className="text-muted mb-3">
+                Update or replace your CV/Resume if needed.
+              </p>
+              <label htmlFor="resume" className="fw-semibold">
+                Upload Resume
+              </label>
               <input
                 type="file"
                 id="resume"
-                className="form-control mt-3"
+                className="form-control mt-2"
+                style={{ borderRadius: "0.5rem" }}
               />
             </div>
 
-            <div
-              className="d-flex gap-3 justify-content-center p-4"
-              style={{ background: "transparent", width: "100%" }}
-            >
+            {/* Buttons */}
+            <div className="d-flex gap-3 justify-content-center mt-4">
               <button
                 type="submit"
-                style={{ height: "50px", width: "180px" }}
-                className="btn btn-primary"
+                className="btn btn-primary px-4 py-2 fw-semibold shadow-sm"
+                style={{
+                  borderRadius: "2rem",
+                  background: "linear-gradient(90deg, #4b6cb7, #182848)",
+                  border: "none",
+                  transition: "transform 0.2s",
+                }}
+                onMouseOver={(e) => (e.currentTarget.style.transform = "scale(1.05)")}
+                onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
               >
                 Update Application
               </button>
               <button
                 type="reset"
-                style={{ height: "50px", width: "180px" }}
-                className="btn btn-secondary"
+                className="btn btn-secondary px-4 py-2 fw-semibold shadow-sm"
+                style={{ borderRadius: "2rem" }}
               >
                 Cancel
               </button>

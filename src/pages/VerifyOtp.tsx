@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import z from "zod";
 import api from "../config/api";
+import "../assets/styles.css";
 
 
 const otpSchema = z.object({
@@ -48,52 +49,58 @@ export default function OtpVerify() {
   };
 
   return (
-    <div
-      className="d-flex justify-content-center p-2"
-      style={{ height: "100%", background: "#f9f9f5" }}
-    >
-      <div
-        className="border p-5 rounded"
-        style={{ width: "500px", background: "white" }}
-      >
-        <div className="text-center mb-2 ">
-          <h1 style={{ fontSize: "32px" }}>📁</h1>
-          <h4 className="mt-2 fs-24 fw-bold">JobPortal</h4>
-        </div>
-
-        <h3 className="text-center fs-32 fw-bold">Verify OTP</h3>
-        <p className="text-center fs-16">
-          Enter the one time password sent to your email
-        </p>
-
-        <form className=" p-4 mt-5" onSubmit={handleSubmit(otpCreation)}>
-          <h6>OTP Verification</h6>
-          <p>Enter the OTP to verify your account</p>
-
+    <div className="signin-container">
+      <div className="signin-card row g-0">
+        <div className="col-lg-6 signin-left d-none d-lg-flex">
           <div>
-            <label className="form-label">OTP</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Enter your OTP"
-              {...register("otp")}
-            />
-            {errors.otp && <p className="text-danger">{errors.otp.message}</p>}
+            <div className="signin-logo">📁</div>
+            <h1 className="signin-title">Verify Your Email</h1>
+            <p className="signin-subtitle">
+              We've sent a verification code to your email. Enter it below to continue.
+            </p>
+            <div className="mt-4">
+              <p className="mb-2">Didn't receive the code?</p>
+              <Link to="/forgot-password" className="btn btn-light btn-lg px-4">
+                Resend OTP
+              </Link>
+            </div>
+          </div>
+        </div>
+        <div className="col-lg-6 signin-right">
+          <div className="text-center mb-4">
+            <h2 className="fw-bold text-primary">OTP Verification</h2>
+            <p className="text-muted">Enter the one-time password sent to your email</p>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              className="btn btn-primary mt-3 text-center w-100"
-            >
+          <form onSubmit={handleSubmit(otpCreation)}>
+            <div className="form-floating mb-4">
+              <input
+                type="text"
+                className="form-control"
+                id="otp"
+                placeholder="000000"
+                {...register("otp")}
+              />
+              <label htmlFor="otp">Enter OTP</label>
+              {errors.otp && (
+                <div className="text-danger small mt-1">{errors.otp.message}</div>
+              )}
+            </div>
+
+            <button type="submit" className="btn btn-signin w-100 mb-3">
               Verify OTP
             </button>
 
-            <p className="mt-3 text-center">
-              Didn't receive OTP? {<Link to="/forgot-password"> Resend </Link>}
-            </p>
-          </div>
-        </form>
+            <div className="text-center d-lg-none">
+              <p className="signup-link mb-0">
+                Didn't receive OTP?{" "}
+                <Link to="/forgot-password" className="signup-link">
+                  Resend
+                </Link>
+              </p>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

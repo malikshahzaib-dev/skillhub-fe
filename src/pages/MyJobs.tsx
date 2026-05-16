@@ -2,293 +2,222 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../config/api";
 import NavBar from "./NavbarComponent";
-
+import { useAuth } from "../config/AuthProvider";
 
 export default function MyJobs() {
   const navigate = useNavigate();
-  const [job, setJob] = useState<any>([]);
-  const user = JSON.parse(localStorage.getItem("user")!);
-  const userId = user?._id;
+  const { user } = useAuth();
 
-  const fetchJob = async () => {
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch Jobs
+  const fetchJobs = async () => {
     try {
-      const res = await api.get(`/job?createdBy=${userId}`);
-      console.log("fetch job createdBy successfully", res.data);
-      setJob(res.data.foundJobsCreatedBy);
-      // setAplication(res.data.countApplication)
+      const res = await api.get(`/job?createdBy=${user?._id}`);
+      console.log("Jobs fetched successfully", res.data);
+
+      setJobs(res.data.foundJobsCreatedBy);
 
     } catch (err: any) {
-      console.error("error to fetch job createdBy");
+      console.error("Error fetching jobs", err);
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Delete Job
+  const deleteJob = async (id: string) => {
+    try {
+      const res = await api.delete(`/job/${id}`);
+      console.log("Job deleted successfully", res.data);
+
+      // refresh jobs
+      fetchJobs();
+
+    } catch (err: any) {
+      console.error("Error deleting job", err);
+    }
+  };
+
+  // Navigate to update page
   const updateJob = (id: string) => {
     navigate(`/update-job/${id}`);
   };
 
-  const deleteJob = async(id: string) => {
-    try {
-      const res = await api.delete(`/job/${id}`);
-      console.log("job deleted successfully", res.data);
-      fetchJob();
-    } catch (err: any) {
-      console.error("error to delete job");
-    }
-  };
-
+  // Filter jobs
+  const filteredJobs = jobs.filter((j: any) =>
+    j.jobTitle.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   useEffect(() => {
-    fetchJob();
-  }, []);
+
+    // if (!user) {
+    //   navigate("/sign-in");
+    //   return;
+    // }
+
+    if (user?._id) {
+      fetchJobs();
+    }
+
+  }, [user]);
+
+  if (loading) return <p>Loading...</p>;
 
   return (
     <>
       <NavBar />
 
-      <div style={{ background: "#ffffff" }}>
-        <div className="container p-2">
-          <h1 className="fw-bold mt-3" style={{ fontSize: "24px" }}>
-            Your Job Listings
-          </h1>
-          <p style={{ fontSize: "16px" }}>
+      <div
+        style={{
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          color: "white",
+          padding: "60px 0",
+        }}
+      >
+        <div className="container text-center">
+          <h1 className="display-4 fw-bold">Your Job Listings</h1>
+          <p className="lead">
             View and manage the jobs posted by your organization.
           </p>
         </div>
-        <div className="container">
-          <div
-            className="row row-cols-3 g-4  mb-5"
-            // style={{
-            //   width: "100%",
-            //   background: "white",
-            //   padding: "20px",
-            // }}
-          >
-            {job.map((job: any, ind: any) => {
-              return (
-                <li key={ind}>
-                  {
-                    <div className="col" style={{ height: "600" }}>
-                      <div
-                        className="border p-3"
-                        style={{ borderRadius: "12px" }}
-                      >
-                        <div className="d-flex justify-content-between gap-4 p-4">
-                          <h5 style={{color:"black",fontSize:"12px"}}>{job?.applicationCount}</h5>
-                          <h6 style={{ fontSize: "18px", fontWeight: "700" }}>
-                            {job?.jobTitle}
-                          </h6>
-                          <div>
-                            <span
-                              className="badge border text-center gap-4"
-                              style={{
-                                height: "25px",
-                                width: "70px",
-                                background: "red",
-                                borderRadius: "12px",
-                              }}
-                            >
-                              {job.status}
-                            </span>
-                          </div>
+      </div>
 
-                          
-                          <div className="dropdown"
+      <div className="container mt-4">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Search jobs..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+      </div>
 
-                          >
-                            <button
-                              className="dropdown-toggle bg-success"
-                              data-bs-toggle="dropdown"
-                              style={{
-                                height: "40px",
-                                width: "30px",
-                                borderRadius: "8px",
-                                color: "white",
-                              }}
-                            >
-                              <ul className="dropdown-menu">
-                                <li>
-                                  <a className="dropdown-item " href="#">
-                                    status
-                                  </a>
-                                </li>
-                                <li>
-                                  <a className="dropdown-item" href="#">
-                                    <button
-                                      onClick={() => updateJob(job._id)}
-                                      className="rounded bg-dark"
-                                      style={{
-                                        height: "30px",
-                                        width: "60px",
-                                        color: "white",
-                                      }}
-                                    >
-                                      Edit
-                                    </button>
-                                  </a>
-                                </li>
-                                <li>
-                                  <a className="dropdown-item" href="#">
-                                    <button
-                                      onClick={() => deleteJob(job._id)}
-                                      className=" rounded bg-dark"
-                                      style={{
-                                        height: "30px",
-                                        width: "70px",
-                                        color: "white",
-                                      }}
-                                    >
-                                      Delete
-                                    </button>
-                                  </a>
-                                </li>
-                              </ul>
-                            </button>
-                          </div>
-                        </div>
-                        <div className="d-flex gap-4 px-4">
-                          <span
-                            className="badge  border text-center"
-                            style={{
-                              height: "25px",
-                              borderRadius: "12px",
-                              width: "100px",
-                              color: "black",
-                            }}
-                          >
-                            {job?.department}
-                          </span>
-                          <span
-                            className="badge  border text-center"
-                            style={{
-                              height: "25px",
-                              borderRadius: "12px",
-                              width: "70px",
-                              color: "black",
-                            }}
-                          >
-                            {job?.jobType}
-                          </span>
-                          <span
-                            className="badge  border text-center"
-                            style={{
-                              height: "25px",
-                              borderRadius: "12px",
-                              width: "60px",
-                              color: "black",
-                            }}
-                          >
-                            Remote
-                          </span>
-                        </div>
-                        <p
-                          className="px-2   text-muted"
-                          style={{ fontSize: "13px", fontWeight: "600" }}
+      <div className="container mt-4">
+        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+          {filteredJobs.map((jobItem: any, ind: any) => {
+            const isDropdownOpen = openDropdownId === jobItem._id;
+            return (
+              <div key={ind} className="col">
+                <div
+                  className="card h-100 shadow-sm"
+                  style={{ borderRadius: "15px", transition: "transform 0.2s" }}
+                  onMouseEnter={(e) =>
+                    (e.currentTarget.style.transform = "translateY(-5px)")
+                  }
+                  onMouseLeave={(e) =>
+                    (e.currentTarget.style.transform = "translateY(0)")
+                  }
+                >
+                  <div className="card-body">
+                    <div className="d-flex justify-content-between align-items-start mb-3">
+                      <div>
+                        <h5 className="card-title fw-bold">
+                          {jobItem?.jobTitle}
+                        </h5>
+                        <small className="text-muted">
+                          Applications: {jobItem?.applicationCount}
+                        </small>
+                      </div>
+                      <div className="d-flex align-items-center gap-2">
+                        <span
+                          className={`badge ${jobItem.status === "active" ? "bg-success" : "bg-secondary"}`}
+                          style={{ borderRadius: "20px" }}
                         >
-                          {/* {newJob?.jobDescription} */}
-                        </p>
-                        <div className="d-flex justify-content-between px-3 py-0">
-                          {/* <p>{newJob?.requirements}</p> */}
-                          {/* <p>{newJob?.benefits}</p> */}
-                        </div>
-                        <div className="d-flex justify-content-between px-3 mb-0 py-0">
-                          <li>
-                            <p>
-                              4+ years <br /> HR/People Ops:
-                              {/* {newJob?.experience} */}
-                            </p>
-                          </li>
-                          <span
-                            className="badge border text-center"
-                            style={{
-                              height: "25px",
-                              borderRadius: "12px",
-                              width: "110px",
-                              color: "black",
-                            }}
-                          >
-                            Parental leave
-                          </span>
-                        </div>
-                        <div className="d-flex justify-content-between px-3 mb-0 py-0">
-                          <li>{/* <p>{newJob?.skills}</p> */}</li>
-                          <p>Excellent communication</p>
-
-                          <span
-                            className="badge border text-center"
-                            style={{
-                              height: "25px",
-                              borderRadius: "12px ",
-                              width: "110px",
-                              color: "black",
-                            }}
-                          >
-                            Wellness stipend
-                          </span>
-                        </div>
-                        <div className="d-flex justify-content-between mb-0 px-3 py-0">
-                          <li>
-                            <p> Familiar with HRIS tools</p>
-                          </li>
-                          {/* <span className="badge border   text-center" style={{height:"20px",width:"110px",color:"black"}}>Remote-friendly</span> */}
-                        </div>
-                        {/* <div className="d-flex justify-content-between px-3 py-0">
-                        <li><p>+ 1 more</p></li>
-                    </div> */}
-                        <div className="d-flex justify-content-center gap-2">
-                          <div>
-                            <span
-                              className="badge border   text-center"
-                              style={{
-                                height: "30px",
-                                width: "170px",
-                                color: "black",
-                              }}
-                            >
-                              {job?.minimumSalary}-{job?.maximumSalary}
-                            </span>
-                          </div>
-                          <div>
-                            <span
-                              className="badge border   text-center"
-                              style={{
-                                height: "30px",
-                                width: "120px",
-                                color: "black",
-                              }}
-                            >
-                              {/* {newJob?.applicationclosingdate} */}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="d-flex justify-content-center mt-3 gap-3 ">
+                          {jobItem.status}
+                        </span>
+                        <div className="dropdown">
                           <button
-                            onClick={() => navigate(`/job/${job._id}`)}
-                            style={{
-                              height: "40px",
-                              width: "120px",
-                              borderRadius: "12px",
-                            }}
-                            className="btn  border "
-                          >
-                            view details
-                          </button>
-                          <button
+                            className="btn btn-outline-secondary btn-sm"
                             onClick={() =>
-                              navigate(`/my-application/${job._id}`)
+                              setOpenDropdownId(
+                                isDropdownOpen ? null : jobItem._id,
+                              )
                             }
-                            style={{ height: "35px", width: "155px" }}
-                            className="btn btn-dark"
+                            style={{
+                              borderRadius: "50%",
+                              width: "35px",
+                              height: "35px",
+                            }}
                           >
-                            View Applications
+                            <i className="bi bi-three-dots-vertical"></i>
                           </button>
+                          {isDropdownOpen && (
+                            <ul
+                              className="dropdown-menu show"
+                              style={{
+                                position: "absolute",
+                                right: 0,
+                                zIndex: 1000,
+                              }}
+                            >
+                              <li>
+                                <button
+                                  className="dropdown-item"
+                                  onClick={() => updateJob(jobItem._id)}
+                                >
+                                  Edit
+                                </button>
+                              </li>
+                              <li>
+                                <button
+                                  className="dropdown-item text-danger"
+                                  onClick={() => deleteJob(jobItem._id)}
+                                >
+                                  Delete
+                                </button>
+                              </li>
+                            </ul>
+                          )}
                         </div>
                       </div>
                     </div>
-                  }
-                </li>
-              );
-            })}
-          </div>
+                    <div className="mb-3">
+                      <span className="badge bg-light text-dark me-2">
+                        {jobItem?.department}
+                      </span>
+                      <span className="badge bg-light text-dark me-2">
+                        {jobItem?.jobType}
+                      </span>
+                      <span className="badge bg-light text-dark">Remote</span>
+                    </div>
+                    <div className="mb-3">
+                      <p className="mb-1">
+                        <strong>Experience:</strong> 4+ years HR/People Ops
+                      </p>
+                      <p className="mb-1">
+                        <strong>Salary:</strong> {jobItem?.minimumSalary} -{" "}
+                        {jobItem?.maximumSalary}
+                      </p>
+                    </div>
+                    <div className="d-flex gap-2">
+                      <button
+                        className="btn btn-primary flex-fill"
+                        onClick={() => navigate(`/job/${jobItem._id}`)}
+                      >
+                        View Details
+                      </button>
+                      <button
+                        className="btn btn-outline-primary flex-fill"
+                        onClick={() =>
+                          navigate(`/my-application/${jobItem._id}`)
+                        }
+                      >
+                        View Applications
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </>

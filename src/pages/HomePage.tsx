@@ -1,25 +1,51 @@
 import { useNavigate } from "react-router-dom";
 import NavBar from "./NavbarComponent";
+import { useAuth } from "../config/AuthProvider";
+import { useEffect, useState } from "react";
+import api from "../config/api";
+
+type Organization = {
+  status: string;
+  _id: string;
+  organizationName?: string;
+};
 
 function HomePage() {
   const navigate = useNavigate();
-   const user = JSON.parse(localStorage.getItem("user") || "null");
-    const userRole = user?.role;
+  const { user } = useAuth();
 
+  const [organizationData, setOrganizationData] = useState<Organization | null>(null);
+  const [search, setSearch] = useState("");
 
-  const handleClik = () => {
-  
-    // const token = localStorage.getItem("token")
-    if (user &&( userRole === "applicant" || userRole === "organization")) {
-      navigate("/jobs");
-    } else {
-      navigate("/sign-in");
+  const role = user?.role;
+
+  // ✅ Fetch organization
+  const findOrganizationByUser = async () => {
+    try {
+      const res = await api.get(`/organization/users/${user?._id}`);
+      setOrganizationData(res.data);
+    } catch (err) {
+      console.log("Error fetching organization");
     }
   };
+
+  useEffect(() => {
+    if (user?.role === "organization") {
+      findOrganizationByUser();
+    }
+  }, [user?._id]);
+
+  // ✅ Handlers
+  const handleBrowseJobs = () => {
+    navigate(`/jobs?search=${search}`);
+  };
+
   const handleCreateJobs = () => {
-   const organization = user?.organization
-    // const token = localStorage.getItem("token")
-    if (user && userRole === "organization" && organization?.status === "approved") {
+    if (
+      user &&
+      role === "organization" &&
+      organizationData?.status === "approved"
+    ) {
       navigate("/create-job");
     } else {
       navigate("/sign-in");
@@ -29,219 +55,148 @@ function HomePage() {
   return (
     <>
       <NavBar />
-      <div className="" style={{ height: "100%", background: "#f9f9f5" }}>
-        {/* <div className="d-flex justify-content-between align-items-center p-5" style={{ height: "100px", width: "100%", background: "grey" }}>
 
-                    <div className="d-flex gap-4">
-                        <h1>📁</h1>
-                        <h1 className="fs-24 fw-bold" style={{ color: "white" }}>JobPortal</h1>
-                    </div>
-                    <div className="d-flex gap-4">
-                            <button  onClick={() => navigate("/sign-in")} className=" rounded" style={{ height: "40px", width: "100px", background: "white" }}>SignIn</button>
-                            <button onClick={() => navigate("/employer-signup")} className="btn " style={{ width: "200px", height: "40px",background:"white" }}>Employers/Post Job</button>
-                    </div>
-
-                </div> */}
-
-        <div className="d-flex justify-content-center">
-          <div className="p-5" style={{ width: "950px" }}>
-            <h1
-              className="text-center mt-3"
-              style={{ fontWeight: "bold", fontSize: "52px" }}
-            >
-              Find Your Dream Job Today
+      <div className="min-vh-100 bg-light">
+        {/* 🔥 HERO SECTION */}
+        <section
+          className="text-white py-5"
+          style={{
+            background: "linear-gradient(135deg, #1e3c72, #2a5298)",
+          }}
+        >
+          <div className="container text-center">
+            <h1 className="display-4 fw-bold mb-3">
+              Get Hired Faster 🚀
             </h1>
-            <p className="text-center  p-3" style={{ fontSize: "36px" }}>
-              Connect with top employers and discover opportunities that match
-              your skills and aspirations. Join thousands of professionals who
-              found their perfect career match.
+            <p className="lead mb-4">
+              Find jobs that match your skills or hire top talent easily.
             </p>
 
-            <div className="d-flex gap-4 justify-content-center mb-2">
+            {/* 🔍 Search Bar */}
+            <div className="d-flex justify-content-center mb-4">
+              <input
+                type="text"
+                placeholder="Search jobs..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="form-control w-50 me-2"
+                style={{ borderRadius: "2rem", padding: "12px" }}
+              />
               <button
-                onClick={handleClik}
-                className="btn btn-primary"
-                style={{
-                  height: "40px",
-                  width: "180px",
-                  background: "#343434",
-                }}
+                onClick={handleBrowseJobs}
+                className="btn btn-warning fw-bold"
+                style={{ borderRadius: "2rem" }}
               >
-                Browse Jobs
+                Search
               </button>
-              {/* <a href="/create-job"> */}
+            </div>
+
+            {/* 🎯 CTA Buttons */}
+            <div className="d-flex justify-content-center gap-3 flex-wrap">
               <button
-                className="rounded"
-                type="button"
-                onClick={handleCreateJobs}
-                style={{ height: "40px", width: "180px" }}
+                onClick={handleBrowseJobs}
+                className="btn btn-light fw-bold"
               >
-                Post a Job
+                Explore Jobs
               </button>
-              {/* </a> */}
+
+              {user?.role === "organization" && (
+                <button
+                  onClick={handleCreateJobs}
+                  className="btn btn-danger fw-bold"
+                >
+                  Post a Job
+                </button>
+              )}
             </div>
           </div>
-        </div>
+        </section>
 
-        <h1 className="text-center fw-bold mt-5">How Job Portal Works</h1>
+        {/* 🧠 HOW IT WORKS */}
+        <section className="py-5">
+          <div className="container text-center">
+            <h2 className="fw-bold mb-5">How It Works</h2>
 
-        <div className="d-flex justify-content-around gap-4 p-5">
-          <div
-            className="border rounded"
-            style={{ height: "320px", background: "white", padding: "30px" }}
+            <div className="row g-4">
+              <div className="col-md-4">
+                <div className="card p-4 shadow-sm h-100">
+                  <h5 className="fw-bold">Create Profile</h5>
+                  <p className="text-muted">
+                    Sign up and build your professional profile.
+                  </p>
+                </div>
+              </div>
+
+              <div className="col-md-4">
+                <div className="card p-4 shadow-sm h-100">
+                  <h5 className="fw-bold">Find Jobs</h5>
+                  <p className="text-muted">
+                    Browse jobs that match your skills.
+                  </p>
+                </div>
+              </div>
+
+              <div className="col-md-4">
+                <div className="card p-4 shadow-sm h-100">
+                  <h5 className="fw-bold">Get Hired</h5>
+                  <p className="text-muted">
+                    Apply and land your dream job.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 📊 STATS */}
+        <section className="bg-white py-5">
+          <div className="container text-center">
+            <div className="row">
+              <div className="col-md-3">
+                <h2 className="fw-bold">10k+</h2>
+                <p>Jobs</p>
+              </div>
+              <div className="col-md-3">
+                <h2 className="fw-bold">5k+</h2>
+                <p>Companies</p>
+              </div>
+              <div className="col-md-3">
+                <h2 className="fw-bold">50k+</h2>
+                <p>Users</p>
+              </div>
+              <div className="col-md-3">
+                <h2 className="fw-bold">95%</h2>
+                <p>Success Rate</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 📩 CTA SECTION */}
+        <section className="py-5 text-center bg-dark text-white">
+          <h2 className="fw-bold mb-3">
+            Ready to Get Started?
+          </h2>
+          <button
+            onClick={() => navigate("/sign-up")}
+            className="btn btn-warning fw-bold"
           >
-            <p className="text-center mt-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                strokeLinejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-users"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
-                <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                <path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />
-              </svg>
-            </p>
+            Create Account
+          </button>
+        </section>
 
-            <h3 className="text-center">For Job Seeker</h3>
-            <p className="text-center">
-              Create your profile, browse opportunities, and apply with ease
-            </p>
-            <p className="text-center">• Browse thousands of job listings</p>
-            <p className="text-center"> • Track application status</p>
-            <p className="text-center">
-              • Get matched with relevant opportunities
+        {/* 🧾 FOOTER */}
+        <footer className="bg-dark text-white py-4">
+          <div className="container text-center">
+            <h5>JobPortal</h5>
+            <p className="mb-0">
+              © 2026 All rights reserved
             </p>
           </div>
-          <div
-            className="border rounded"
-            style={{ height: "320px", background: "white", padding: "30px" }}
-          >
-            <p className="text-center mt-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-license"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M15 21h-9a3 3 0 0 1 -3 -3v-1h10v2a2 2 0 0 0 4 0v-14a2 2 0 1 1 2 2h-2m2 -4h-11a3 3 0 0 0 -3 3v11" />
-                <path d="M9 7l4 0" />
-                <path d="M9 11l4 0" />
-              </svg>
-            </p>
-
-            <h3 className="text-center">For Organization</h3>
-            <p className="text-center">
-              Create your profile, browse opportunities, and apply with ease
-            </p>
-            <p className="text-center">• Browse thousands of job listings</p>
-            <p className="text-center"> • Track application status</p>
-
-            <p className="text-center">
-              • Get matched with relevant opportunities
-            </p>
-          </div>
-          <div
-            className="border rounded"
-            style={{ height: "320px", background: "white", padding: "30px" }}
-          >
-            <p className="text-center mt-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-users"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" />
-                <path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                <path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />
-              </svg>
-            </p>
-
-            <h3 className="text-center">Smart Matching</h3>
-            <p className="text-center">
-              Create your profile, browse opportunities, and apply with ease
-            </p>
-            <p className="text-center">• Browse thousands of job listings</p>
-            <p className="text-center"> • Track application status</p>
-
-            <p className="text-center">
-              • Get matched with relevant opportunities
-            </p>
-          </div>
-        </div>
-        <div className="d-flex justify-content-around mb-4 mt-5">
-          <div>
-            <h1 style={{ color: "#2E8B57" }}>10k</h1>
-            <p>Active Jobs</p>
-          </div>
-          <div>
-            <h1 style={{ color: "#2E8B57" }}>5k</h1>
-            <p>Companies</p>
-          </div>
-          <div>
-            <h1 style={{ color: "#2E8B57" }}>50k</h1>
-            <p>Job Seekers</p>
-          </div>
-          <div>
-            <h1 style={{ color: "#2E8B57" }}>95%</h1>
-            <p>Success Rate</p>
-          </div>
-        </div>
-
-        <div
-          className="d-flex justify-content-between align-items-center p-5 mb-5"
-          style={{ height: "100px", width: "100%", border: "1px solid" }}
-        >
-          <div className="d-flex gap-4 align-items-center">
-            <h5 className="text-center">📁</h5>
-            <h6 className="text-center">JobPortal</h6>
-          </div>
-          <div className="d-flex gap-4">
-            <a href="">
-              <p>about</p>
-            </a>
-            <a href="">
-              <p>contact</p>
-            </a>
-            <a href="">
-              <p>privacy</p>
-            </a>
-            <a href="">
-              <p>terms</p>
-            </a>
-          </div>
-        </div>
-        <div>
-          <p className="mt-3 text-center">
-            © 2024 JobPortal. All rights reserved.
-          </p>
-        </div>
+        </footer>
       </div>
     </>
   );
 }
+
 export default HomePage;

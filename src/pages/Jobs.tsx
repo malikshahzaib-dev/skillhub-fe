@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import api from "../config/api";
 import NavBar from "./NavbarComponent";
+import "../assets/styles.css";
+import { useAuth } from "../config/AuthProvider";
 
 export default function Jobs() {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("user")!)
-  const userRole = user?.role
+
+  const {user} = useAuth();
+  const role = user?.role
   const location = useLocation();
   const { newJob, createdBy } = location.state || {};
   console.log(newJob, "new job from create job componenet");
@@ -29,7 +32,7 @@ export default function Jobs() {
   };
 
   useEffect(() => {
-    fetchJob();
+    fetchJob()
   }, []);
 
   
@@ -56,228 +59,130 @@ export default function Jobs() {
 
   if (loading) {
     return (
-      <div>
-        <p className="text-center">loading...</p>
-      </div>
+      <>
+        <NavBar />
+        <div className="loading-spinner">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </>
     );
   }
 
   return (
     <>
       <NavBar />
-      <div style={{ background: "#ffffff" }}>
-        <div className="container p-2">
-          <div className="d-flex justify-content-center align-items-center gap-3">
-             
-            <input
-              value={searchJob}
-              onChange={(e) => setSearchJob(e.target.value)}
-              placeholder="Search jobs"
-              className="border mt-3"
-              type="text"
-              style={{
-                height: "40px",
-                borderRadius: "12px",
-                width: "60%",
-                paddingLeft: "30px",
-              }}
-            />
-          <button onClick={handleSearchChange} className="mt-3 rounded bg-dark" style={{height:"35px",width:"80px",color:"white"}}>Search</button>
-
+      <div className="bg-light min-vh-100">
+        {/* Hero Section */}
+        <section className="jobs-hero">
+          <div className="container">
+            <div className="row justify-content-center">
+              <div className="col-lg-8 text-center">
+                <h1 className="display-4 fw-bold mb-4">Find Your Dream Job</h1>
+                <p className="lead mb-5">
+                  Discover opportunities that match your skills and aspirations
+                </p>
+                <div className="search-container">
+                  <input
+                    value={searchJob}
+                    onChange={(e) => setSearchJob(e.target.value)}
+                    placeholder="Search for jobs..."
+                    className="search-input"
+                    type="text"
+                  />
+                  <button onClick={handleSearchChange} className="search-btn">
+                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
+        </section>
 
-          <h1 className="fw-bold  mt-3 " style={{ fontSize: "24px" }}>
-            Open roles
-          </h1>
-          <p style={{ fontSize: "16px" }}>
-            Explore opportunities across differe nt departments — click a card
-            to view more details.
-          </p>
-        </div>
-        <div className="container">
-          <div
-            className="row row-cols-3 g-4  mb-5"
-            // style={{
-            //   width: "100%",
-            //   background: "white",
-            //   padding: "20px",
-            // }}
-          >
-            {job.map((newJob: any, ind: any) => {
-              return (
-                <li key={ind}>
-                  {
-                    <div className="col" style={{ height: "600" }}>
-                      <div
-                        className="border p-4"
-                        style={{ borderRadius: "12px" }}
-                      >
-                        <div className="d-flex justify-content-between gap-1 p-4">
-                          <h6 style={{ fontSize: "18px", fontWeight: "700" }}>
-                            {newJob?.jobTitle}
-                          </h6>
-                          <div>
-                            <span
-                              className="badge border text-center gap-4"
-                              style={{
-                                height: "25px",
-                                width: "70px",
-                                background: "red",
-                                borderRadius: "12px",
-                              }}
-                            >
-                              {newJob.status}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="d-flex gap-4 px-4">
-                          <span
-                            className="badge  border text-center"
-                            style={{
-                              height: "25px",
-                              borderRadius: "12px",
-                              width: "100px",
-                              color: "black",
-                            }}
-                          >
-                            {newJob?.department}
-                          </span>
-                          <span
-                            className="badge  border text-center"
-                            style={{
-                              height: "25px",
-                              borderRadius: "12px",
-                              width: "70px",
-                              color: "black",
-                            }}
-                          >
-                            {newJob?.jobType}
-                          </span>
-                          <span
-                            className="badge  border text-center"
-                            style={{
-                              height: "25px",
-                              borderRadius: "12px",
-                              width: "60px",
-                              color: "black",
-                            }}
-                          >
-                            Remote
-                          </span>
-                        </div>
-                        <p
-                          className="px-2   text-muted"
-                          style={{ fontSize: "13px", fontWeight: "600" }}
-                        >
-                          {/* {newJob?.jobDescription} */}
-                        </p>
-                        <div className="d-flex justify-content-between px-3 py-0">
-                          {/* <p>{newJob?.requirements}</p> */}
-                          {/* <p>{newJob?.benefits}</p> */}
-                        </div>
-                        <div className="d-flex justify-content-between px-3 mb-0 py-0">
-                          <li>
-                            <p>
-                              4+ years <br /> HR/People Ops:
-                              {/* {newJob?.experience} */}
-                            </p>
-                          </li>
-                          <span
-                            className="badge border text-center"
-                            style={{
-                              height: "25px",
-                              borderRadius: "12px",
-                              width: "110px",
-                              color: "black",
-                            }}
-                          >
-                            Parental leave
-                          </span>
-                        </div>
-                        <div className="d-flex justify-content-between px-3 mb-0 py-0">
-                          <li>{/* <p>{newJob?.skills}</p> */}</li>
-                          <p>Excellent communication</p>
+        {/* Jobs Section */}
+        <section className="py-5">
+          <div className="container">
+            <div className="row mb-4">
+              <div className="col">
+                <h2 className="fw-bold">Open Positions</h2>
+                <p className="text-muted">Explore opportunities across different departments</p>
+              </div>
+            </div>
+            <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+              {job.map((newJob: any, ind: any) => (
+                <div key={ind} className="col">
+                  <div  className="job-card card h-100">
+                    <div className="card-body d-flex flex-column">
+                      <div className="d-flex justify-content-between align-items-start mb-3">
+                        <h5 className="job-title card-title fw-bold">{newJob?.jobTitle}</h5>
+                        <span className={`badge ${newJob.status === 'Active' ? 'bg-success' : 'bg-danger'}`}>
+                          {newJob.status}
+                        </span>
+                      </div>
 
-                          <span
-                            className="badge border text-center"
-                            style={{
-                              height: "25px",
-                              borderRadius: "12px ",
-                              width: "110px",
-                              color: "black",
-                            }}
-                          >
-                            Wellness stipend
+                      <div className="mb-3">
+                        <span className="badge bg-light text-dark me-2 job-badge">{newJob?.department}</span>
+                        <span className="badge bg-light text-dark me-2 job-badge">{newJob?.jobType}</span>
+                        <span className="badge bg-light text-dark job-badge">Remote</span>
+                      </div>
+
+                      <div className="mb-3">
+                        <small className="text-muted">
+                          <strong>Experience:</strong> 4+ years HR/People Ops
+                        </small>
+                      </div>
+
+                      <div className="mb-3">
+                        <small className="text-muted">
+                          <strong>Skills:</strong> Excellent communication, Familiar with HRIS tools
+                        </small>
+                      </div>
+
+                      <div className="mb-3">
+                        <span className="badge bg-light text-dark me-2 job-badge">Parental leave</span>
+                        <span className="badge bg-light text-dark job-badge">Wellness stipend</span>
+                      </div>
+
+                      <div className="mt-auto">
+                        <div className="d-flex justify-content-between align-items-center mb-3">
+                          <span className="salary-badge badge text-white fw-bold">
+                            ${newJob?.minimumSalary} - ${newJob?.maximumSalary}
                           </span>
                         </div>
-                        <div className="d-flex justify-content-between mb-0 px-3 py-0">
-                          <li>
-                            <p> Familiar with HRIS tools</p>
-                          </li>
-                          {/* <span className="badge border   text-center" style={{height:"20px",width:"110px",color:"black"}}>Remote-friendly</span> */}
-                        </div>
-                        {/* <div className="d-flex justify-content-between px-3 py-0">
-                        <li><p>+ 1 more</p></li>
-                    </div> */}
-                        <div className="d-flex justify-content-center gap-2">
-                          <div>
-                            <span
-                              className="badge border   text-center"
-                              style={{
-                                height: "30px",
-                                width: "170px",
-                                color: "black",
-                              }}
-                            >
-                              {newJob?.minimumSalary}-{newJob?.maximumSalary}
-                            </span>
-                          </div>
-                          <div>
-                            <span
-                              className="badge border   text-center"
-                              style={{
-                                height: "30px",
-                                width: "120px",
-                                color: "black",
-                              }}
-                            >
-                              {/* {newJob?.applicationclosingdate} */}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="d-flex justify-content-center mt-3 gap-3 ">
+
+                        <div className="d-flex gap-2">
                           <button
                             onClick={() => navigate(`/job/${newJob._id}`)}
-                            style={{
-                              height: "40px",
-                              width: "120px",
-                              borderRadius: "12px",
-                            }}
-                            className="btn  border "
+                            className="btn btn-outline-primary flex-fill"
                           >
-                            view details
+                            View Details
                           </button>
                           <button
-                          disabled = {userRole !== "applicant" || newJob.status === "Inactive"}
-                          
-                            onClick={() =>
-                              
-                              navigate(`/create-application/${newJob._id}`)
-                            }
-                            style={{ height: "35px", width: "70px" }}
-                            className="btn btn-dark"
+                            disabled={role !== "applicant" || newJob.status === "Inactive"}
+                            onClick={() => navigate(`/create-application/${newJob._id}`)}
+                            className="btn btn-primary flex-fill"
                           >
                             Apply
                           </button>
                         </div>
                       </div>
                     </div>
-                  }
-                </li>
-              );
-            })}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {job.length === 0 && (
+              <div className="text-center py-5">
+                <h3 className="text-muted">No jobs found</h3>
+                <p className="text-muted">Try adjusting your search criteria</p>
+              </div>
+            )}
           </div>
-        </div>
+        </section>
       </div>
     </>
   );

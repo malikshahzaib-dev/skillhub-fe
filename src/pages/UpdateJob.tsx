@@ -2,10 +2,10 @@ import { data, useNavigate, useParams } from "react-router-dom";
 import api from "../config/api";
 import { useEffect, useState } from "react";
 import NavBar from "./NavbarComponent";
+import { useAuth } from "../config/AuthProvider";
 
 export default function UpdateJob() {
   const navigate = useNavigate();
-  const [job, setJob] = useState<any>(null);
   const [requirements, setRequirements] = useState<string[]>([]);
   const [newRequirements, setNewRequirements] = useState("");
   const [responsibilities, setResponsibilities] = useState<string[]>([]);
@@ -22,7 +22,7 @@ export default function UpdateJob() {
   const [maximumSalary, setMaximumSalary] = useState("");
   const [applicationClosingDate, setApplicationClosingDate] = useState("");
   const { jobId } = useParams();
-
+  const {user} = useAuth() 
   const benefitsHandler = async (benefit: string) => {
     setBenefits([...benefits, benefit]);
     setNewBenefits("");
@@ -56,7 +56,6 @@ export default function UpdateJob() {
       if (!job) {
         return console.error("job not found");
       }
-      setJob(job);
       setJobTitle(job.jobTitle);
       setDepartment(job.department);
       setLocation(job.location);
@@ -76,7 +75,8 @@ export default function UpdateJob() {
   };
 
   useEffect(() => {
-    fetchJob();
+    fetchJob()
+    if(!user) navigate("/sign-in");
   }, [jobId]);
 
   const updatedJob = async (e: any) => {
@@ -110,319 +110,248 @@ export default function UpdateJob() {
   return (
     <>
       <NavBar />
-      <div style={{ background: "#f9f9f5", minHeight: "100vh" }}>
-        <div>
-          <h1
-            className="text-center pt-5"
-            style={{ fontSize: "40px", fontWeight: 700 }}
-          >
-            Update a Job
-          </h1>
-          <p className="text-center pt-3" style={{ fontSize: "20px" }}>
-            Fill out the form below to add a new job listing to your
-            organization
-          </p>
-        </div>
+      <div style={{ background: "#f5f6fa", minHeight: "100vh" }}>
+  {/* Header */}
+  <div className="text-center py-5">
+    <h1 className="fw-bold" style={{ fontSize: "42px" }}>
+      Update Job
+    </h1>
+    <p className="text-muted fs-5 mt-2">
+      Update the job details for your organization
+    </p>
+  </div>
 
-        <form onSubmit={updatedJob}>
-          <div className="d-flex justify-content-center pt-3">
-            <div
-              className="rounded p-5"
-              style={{ width: "900px", background: "#ffffff" }}
-            >
-              <h1 className="fs-8">Basic Information</h1>
-              <p className="mt-2" style={{ fontSize: "20px" }}>
-                Essential details about the job position
-              </p>
+  <form onSubmit={updatedJob}>
+    {/* Basic Information */}
+    <div className="d-flex justify-content-center mb-5">
+      <div className="card shadow-sm rounded-4 p-5" style={{ width: "900px" }}>
+        <h4 className="fw-bold mb-1">Basic Information</h4>
+        <p className="text-muted mb-4">
+          Essential details about the job position
+        </p>
 
-              <div className="d-flex gap-4 mt-4">
-                <div style={{ width: "50%" }}>
-                  <label className="form-label fw-semibold">Job Title *</label>
-                  <input
-                    value={jobTitle}
-                    onChange={(e) => setJobTitle(e.target.value)}
-                    type="text"
-                    className="form-control"
-                    placeholder="e.g. Senior Frontend Developer"
-                  />
-                </div>
-
-                <div style={{ width: "50%" }}>
-                  <label className="form-label fw-semibold">Department *</label>
-                  <input
-                    value={department}
-                    onChange={(e) => setDepartment(e.target.value)}
-                    type="text"
-                    className="form-control"
-                    placeholder="e.g. Engineering"
-                  />
-                </div>
-              </div>
-
-              <div className="d-flex gap-4 mt-4">
-                <div style={{ width: "50%" }}>
-                  <label className="form-label fw-semibold">Location *</label>
-                  <input
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    type="text"
-                    className="form-control"
-                    placeholder="e.g. New York or Remote"
-                  />
-                </div>
-
-                <div style={{ width: "25%" }}>
-                  <label className="form-label fw-semibold">Job Type *</label>
-                  <select
-                    value={jobType}
-                    onChange={(e) => setJobType(e.target.value)}
-                    className="form-control"
-                  >
-                    <option value="full-time">Full-time</option>
-                    <option value="part-time">Part-time</option>
-                    <option value="contract">Contract</option>
-                    <option value="internship">Internship</option>
-                  </select>
-                </div>
-
-                <div style={{ width: "25%" }}>
-                  <label className="form-label fw-semibold">Status *</label>
-                  <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    className="form-control"
-                  >
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
-                  </select>
-                </div>
-              </div>
-            </div>
+        <div className="row g-4">
+          <div className="col-md-6">
+            <label className="form-label fw-semibold">Job Title *</label>
+            <input
+              value={jobTitle}
+              onChange={(e) => setJobTitle(e.target.value)}
+              type="text"
+              className="form-control form-control-lg"
+              placeholder="Senior Frontend Developer"
+            />
           </div>
 
-          <div className="d-flex justify-content-center mt-5">
-            <div
-              className="p-4 rounded"
-              style={{ width: "900px", background: "#ffffff" }}
+          <div className="col-md-6">
+            <label className="form-label fw-semibold">Department *</label>
+            <input
+              value={department}
+              onChange={(e) => setDepartment(e.target.value)}
+              type="text"
+              className="form-control form-control-lg"
+              placeholder="Engineering"
+            />
+          </div>
+
+          <div className="col-md-6">
+            <label className="form-label fw-semibold">Location *</label>
+            <input
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              type="text"
+              className="form-control form-control-lg"
+              placeholder="Remote / New York"
+            />
+          </div>
+
+          <div className="col-md-3">
+            <label className="form-label fw-semibold">Job Type *</label>
+            <select
+              value={jobType}
+              onChange={(e) => setJobType(e.target.value)}
+              className="form-select form-select-lg"
             >
-              <h1 className="fs-8">Job Description & Requirements</h1>
-              <p style={{ fontSize: "20px" }}>
-                Detailed information about the role and expectations
-              </p>
+              <option>Full-time</option>
+              <option>Part-time</option>
+              <option>Contract</option>
+              <option>Internship</option>
+            </select>
+          </div>
 
-              <label className="form-label fw-semibold">
-                Job Description *
-              </label>
-              <textarea
-                value={jobDescription}
-                onChange={(e) => setJobDescription(e.target.value)}
-                className="form-control mt-2"
-                style={{ height: "140px" }}
-                placeholder="Describe responsibilities and what the candidate will work on..."
-              ></textarea>
+          <div className="col-md-3">
+            <label className="form-label fw-semibold">Status *</label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="form-select form-select-lg"
+            >
+              <option>Active</option>
+              <option>Inactive</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
 
-              <div className="d-flex gap-4 mt-4">
-                <div style={{ width: "100%" }}>
-                  <label className="form-label fw-semibold mt-3">
-                    Requirements *
-                  </label>
-                  <textarea
-                    value={newRequirements}
-                    onChange={(e) => setNewRequirements(e.target.value)}
-                    className="form-control mt-2"
-                    style={{ height: "100px" }}
-                    placeholder="List job requirements..."
-                  ></textarea>
+    {/* Description & Requirements */}
+    <div className="d-flex justify-content-center mb-5">
+      <div className="card shadow-sm rounded-4 p-5" style={{ width: "900px" }}>
+        <h4 className="fw-bold mb-1">Job Description & Requirements</h4>
+        <p className="text-muted mb-4">
+          Detailed information about the role
+        </p>
 
-                  <div style={{ height: "100px", overflowY: "scroll" }}>
-                    <ul>
-                      {requirements.map((requirement, index) => (
-                        <li
-                          key={index}
-                          className="d-flex justify-content-between align-items-center"
-                        >
-                          {requirement}
-                          <button
-                            type="button"
-                            style={{ height: "25px" }}
-                            onClick={() => removeRequirement(requirement)}
-                            className="btn btn-dark btn-sm mt-2"
-                          >
-                            Remove
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
+        <label className="form-label fw-semibold">Job Description *</label>
+        <textarea
+          value={jobDescription}
+          onChange={(e) => setJobDescription(e.target.value)}
+          className="form-control form-control-lg mb-4"
+          style={{ height: "150px" }}
+        />
 
-                    <div className="d-flex gap-4 mt-2">
-                      <button
-                        type="button"
-                        style={{ height: "40px" }}
-                        onClick={() => requirementsHandler(newRequirements)}
-                        className="btn btn-primary"
-                      >
-                        Add Requirement
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        <label className="form-label fw-semibold">Requirements *</label>
+        <textarea
+          value={newRequirements}
+          onChange={(e) => setNewRequirements(e.target.value)}
+          className="form-control mb-3"
+          style={{ height: "110px" }}
+        />
 
-              <label className="form-label fw-semibold mt-3">
-                Responsibilities *
-              </label>
-              <textarea
-                value={newResponsibilities}
-                onChange={(e) => setNewResponsibilities(e.target.value)}
-                className="form-control mt-2"
-                style={{ height: "100px" }}
-                placeholder="List job responsibilities..."
-              ></textarea>
-
-              <ul>
-                <div>
-                  {responsibilities.map((responsibility, index) => {
-                    return (
-                      <li
-                        className="d-flex justify-content-between align-items-center"
-                        key={index}
-                      >
-                        {responsibility}
-                        <button
-                          type="button"
-                          onClick={() => removeResponsibilities(responsibility)}
-                          className="btn btn-dark btn-sm mt-2"
-                          style={{ height: "25px", background: "black" }}
-                        >
-                          Remove
-                        </button>
-                      </li>
-                    );
-                  })}
-                </div>
-              </ul>
+        <ul className="list-group mb-3">
+          {requirements.map((req, index) => (
+            <li key={index} className="list-group-item d-flex justify-content-between">
+              {req}
               <button
                 type="button"
-                onClick={() => responsibilitiesHandler(newResponsibilities)}
-                className="btn btn-primary mt-2"
+                onClick={() => removeRequirement(req)}
+                className="btn btn-sm btn-outline-danger"
               >
-                Add Responsibility
+                Remove
               </button>
-            </div>
-          </div>
+            </li>
+          ))}
+        </ul>
 
-          <div className="d-flex justify-content-center mt-5">
-            <div
-              className="p-4 rounded"
-              style={{ width: "900px", background: "#ffffff" }}
-            >
-              <div className="d-flex gap-4">
-                <div style={{ width: "50%" }}>
-                  <label className="form-label fw-semibold">
-                    Minimum Salary *
-                  </label>
-                  <input
-                    value={minmumSalary}
-                    onChange={(e) => setMinimumSalary(e.target.value)}
-                    type="number"
-                    className="form-control"
-                    placeholder="e.g. $60,000"
-                  />
-                </div>
-                <div style={{ width: "50%" }}>
-                  <label className="form-label fw-semibold">
-                    Maximum Salary *
-                  </label>
-                  <input
-                    value={maximumSalary}
-                    onChange={(e) => setMaximumSalary(e.target.value)}
-                    type="number"
-                    className="form-control"
-                    placeholder="e.g. $90,000"
-                  />
-                </div>
-              </div>
-               <div>
-              <label className="form-label fw-semibold mt-3">Benefits *</label>
-              <textarea
-                value={newBenefits}
-                onChange={(e) => setNewBenefits(e.target.value)}
-                className="form-control mt-2"
-                style={{ height: "140px" }}
-                placeholder="List job benefits..."
-              ></textarea>
-              <ul>
-                {benefits.map((benefit, index) => {
-                  return (
-                    <li
-                      key={index}
-                      className="d-flex justify-content-between align-items-center "
-                    >
-                      {benefit}
-                      <button
-                        type="button"
-                        onClick={() => removeBenefits(benefit)}
-                        className="btn btn-dark btn-sm mt-2"
-                        style={{ height: "25px", background: "black" }}
-                      >
-                        Remove
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-                <button
-                  type="button"
-                  className="btn btn-primary mt-3"
-                  style={{ height: "40px", width: "120px" }}
-                  onClick={() => benefitsHandler(newBenefits)}
-                >
-                  add benefits
-                </button>
-                </div>
+        <button
+          type="button"
+          onClick={() => requirementsHandler(newRequirements)}
+          className="btn btn-primary mb-4"
+        >
+          Add Requirement
+        </button>
 
-              {/* {errors.benefits && (
-                <p className="text-danger">{errors.benefits.message}</p>
-              )} */}
+        <label className="form-label fw-semibold">Responsibilities *</label>
+        <textarea
+          value={newResponsibilities}
+          onChange={(e) => setNewResponsibilities(e.target.value)}
+          className="form-control mb-3"
+          style={{ height: "110px" }}
+        />
 
-              <label className="form-label fw-semibold mt-3">
-                Application Closing Date *
-              </label>
-              <input
-                value={applicationClosingDate}
-                onChange={(e) => setApplicationClosingDate(e.target.value)}
-                type="date"
-                className="form-control mt-2"
-              ></input>
+        <ul className="list-group mb-3">
+          {responsibilities.map((res, index) => (
+            <li key={index} className="list-group-item d-flex justify-content-between">
+              {res}
+              <button
+                type="button"
+                onClick={() => removeResponsibilities(res)}
+                className="btn btn-sm btn-outline-danger"
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
 
-              {/* 
-              <label className="form-label fw-semibold mt-3">
-                Application Closing Date *
-              </label>
-              <input
-                {...register("applicationclosingdate")}
-                type="date"
-                className="form-control mt-2"
-              /> */}
-            </div>
-          </div>
-
-          <div className="d-flex justify-content-center mt-5 p-3">
-            <button
-              type="submit"
-              className="rounded"
-              style={{
-                height: "50px",
-                width: "240px",
-                background: "#865cdd",
-                color: "white",
-              }}
-            >
-              Update Job
-            </button>
-          </div>
-        </form>
+        <button
+          type="button"
+          onClick={() => responsibilitiesHandler(newResponsibilities)}
+          className="btn btn-primary"
+        >
+          Add Responsibility
+        </button>
       </div>
+    </div>
+
+    {/* Salary & Benefits */}
+    <div className="d-flex justify-content-center mb-5">
+      <div className="card shadow-sm rounded-4 p-5" style={{ width: "900px" }}>
+        <div className="row g-4 mb-4">
+          <div className="col-md-6">
+            <label className="form-label fw-semibold">Minimum Salary *</label>
+            <input
+              value={minmumSalary}
+              onChange={(e) => setMinimumSalary(e.target.value)}
+              type="number"
+              className="form-control form-control-lg"
+            />
+          </div>
+
+          <div className="col-md-6">
+            <label className="form-label fw-semibold">Maximum Salary *</label>
+            <input
+              value={maximumSalary}
+              onChange={(e) => setMaximumSalary(e.target.value)}
+              type="number"
+              className="form-control form-control-lg"
+            />
+          </div>
+        </div>
+
+        <label className="form-label fw-semibold">Benefits *</label>
+        <textarea
+          value={newBenefits}
+          onChange={(e) => setNewBenefits(e.target.value)}
+          className="form-control mb-3"
+          style={{ height: "140px" }}
+        />
+
+        <ul className="list-group mb-3">
+          {benefits.map((b, index) => (
+            <li key={index} className="list-group-item d-flex justify-content-between">
+              {b}
+              <button
+                type="button"
+                onClick={() => removeBenefits(b)}
+                className="btn btn-sm btn-outline-danger"
+              >
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+
+        <button
+          type="button"
+          onClick={() => benefitsHandler(newBenefits)}
+          className="btn btn-primary mb-4"
+        >
+          Add Benefit
+        </button>
+
+        <label className="form-label fw-semibold">Application Closing Date *</label>
+        <input
+          value={applicationClosingDate}
+          onChange={(e) => setApplicationClosingDate(e.target.value)}
+          type="date"
+          className="form-control form-control-lg"
+        />
+      </div>
+    </div>
+
+    {/* Submit */}
+    <div className="d-flex justify-content-center pb-5">
+      <button
+        type="submit"
+        className="btn btn-lg px-5"
+        style={{ background: "#865cdd", color: "white", borderRadius: "14px" }}
+      >
+        Update Job
+      </button>
+    </div>
+  </form>
+</div>
+
     </>
   );
 }

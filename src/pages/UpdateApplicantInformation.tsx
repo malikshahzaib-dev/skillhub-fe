@@ -2,10 +2,10 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from "../config/api";
 import { useEffect, useState } from "react";
 import NavBar from "./NavbarComponent";
+import { useAuth } from "../config/AuthProvider";
 
 export default function UpdateApplicantInformation() {
-  const navigate = useNavigate()
-  const [applicant, setApplicant] = useState<any>(null);
+  const navigate = useNavigate();
   const [education, setEducation] = useState("");
   const [experience, setExperience] = useState("");
   const [address, setAddress] = useState("");
@@ -13,29 +13,28 @@ export default function UpdateApplicantInformation() {
   const [resume, setResume] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const { id } = useParams();
-  console.log(id, "ids");
+  const {user} = useAuth()
 
   const fetchApplicantInformation = async () => {
     try {
       const res = await api.get(`/applicant/users/${id}`);
       console.log("found applicant", res.data);
-      const data = res.data.foundApplicant
-      console.log(data,"data response")
+      const data = res.data.foundApplicant;
+      console.log(data, "data response");
 
-      setApplicant(data);
       setEducation(data.education);
       setExperience(data.experience);
       setAddress(data.address);
       setContactNumber(data.contactNumber);
       setSkills(data.skills);
       setResume(data.files);
-
     } catch (err: any) {
       console.error("error to fetch applicant information");
     }
   };
   useEffect(() => {
-    fetchApplicantInformation();
+    fetchApplicantInformation()
+    if(!user) navigate("/sign-in");
   }, [id]);
 
   const updatedApplicantInformation = async (e: any) => {
@@ -51,8 +50,7 @@ export default function UpdateApplicantInformation() {
       const res = await api.patch(`/applicant/users/${id}`, payLoad);
       console.log("applicant information updated successfully", res.data);
       fetchApplicantInformation();
-      navigate("/applicant-dashboard")
-
+      navigate("/applicant-dashboard");
     } catch (err: any) {
       console.error("error to update applicant information");
     }
@@ -69,72 +67,79 @@ export default function UpdateApplicantInformation() {
         </div>
 
         <form onSubmit={updatedApplicantInformation}>
-          <div className="d-flex justify-content-center">
-            <div
-              className="rounded p-4"
-              style={{ height: "720px", width: "800px", background: "white" }}
-            >
-              <h1>Applicant Information</h1>
-              <p className="mt-3" style={{ fontSize: "20px" }}>
-                pleage give your informatiion to update
-              </p>
+          <div
+            className="card shadow-sm mb-4 mx-auto"
+            style={{ maxWidth: "800px" }}
+          >
+            <div className="card-header bg-primary text-white">
+              <h5 className="card-title mb-0">
+                <i className="bi bi-person-circle me-2"></i>Applicant
+                Information
+              </h5>
+              <small>Please provide your information to update</small>
+            </div>
+            <div className="card-body">
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold">Education</label>
+                  <input
+                    type="text"
+                    value={education}
+                    onChange={(e) => setEducation(e.target.value)}
+                    className="form-control"
+                    placeholder="Enter your education"
+                  />
+                </div>
 
-              <label htmlFor="" className="form-label mt-3">
-                Education
-              </label>
-              <input
-                type="text"
-                value={education}
-                onChange={(e) => setEducation(e.target.value)}
-                className="form-control mt-2"
-                placeholder="enter your education"
-              />
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold">Experience</label>
+                  <input
+                    type="text"
+                    value={experience}
+                    onChange={(e) => setExperience(e.target.value)}
+                    className="form-control"
+                    placeholder="Enter your experience"
+                  />
+                </div>
 
-              <label htmlFor="" className="form-label mt-3">
-                Experience
-              </label>
-              <input
-                type="text"
-                value={experience}
-                onChange={(e) => setExperience(e.target.value)}
-                className="form-control mt-2"
-                placeholder="enter your education"
-              />
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold">
+                    Contact Number
+                  </label>
+                  <input
+                    type="number"
+                    value={contactNumber}
+                    onChange={(e) => setContactNumber(e.target.value)}
+                    className="form-control"
+                    placeholder="Enter your contact number"
+                  />
+                </div>
 
-              <label htmlFor="" className="form-label mt-3">
-                Contact Number
-              </label>
-              <input
-                type="number"
-                value={contactNumber}
-                onChange={(e) => setContactNumber(e.target.value)}
-                className="form-control mt-2"
-                placeholder="enter your education"
-              />
+                <div className="col-md-6">
+                  <label className="form-label fw-semibold">Skills</label>
+                  <input
+                    type="text"
+                    value={skills}
+                    onChange={(e) => setSkills(e.target.value)}
+                    className="form-control"
+                    placeholder="Enter your skills"
+                  />
+                </div>
 
-              <label htmlFor="" className="form-label mt-3">
-                Skills
-              </label>
-              <input
-                type="text"
-                value={skills}
-                onChange={(e) => setSkills(e.target.value)}
-                className="form-control mt-2"
-                placeholder="enter your education"
-              />
-
-              <label htmlFor="" className="form-label mt-3">
-                Address
-              </label>
-              <input
-                type="text"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                className="form-control mt-2"
-                placeholder="enter your education"
-              />
+                <div className="col-12">
+                  <label className="form-label fw-semibold">Address</label>
+                  <input
+                    type="text"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="form-control"
+                    placeholder="Enter your address"
+                  />
+                </div>
+              </div>
             </div>
           </div>
+
           <div className="d-flex justify-content-center mt-3  p-4">
             <div
               className="p-4"

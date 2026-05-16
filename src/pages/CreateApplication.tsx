@@ -1,34 +1,32 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import z from "zod";
+import { z } from "zod";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import NavBar from "./NavbarComponent";
+import { useAuth } from "../config/AuthProvider";
 
 const applicationSchema = z.object({
   coverLetter: z.string().min(1, "Cover letter is required"),
-  phone: z.number().min(11, "Phone must be at least 11 characters"),
-  address:z.string(),
-  dateofBirth: z.string().refine((val) => !isNaN(Date.parse(val)), {
-    message: "Invalid date format",
-  }),
-
-  resume: z.any().optional(),
-  expectedSalary: z
+  phone: z
     .number()
-    .min(1, "Expected salary must be a positive number"),
+    .refine((val) => !isNaN(val) && val > 0, { message: "Phone must be valid" }),
+  address: z.string().min(1, "Address is required"),
+  dateofBirth: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date format" }),
+  resume: z.any().optional(),
+  expectedSalary: z.number().min(1, "Expected salary must be positive"),
 });
 
 type CreateApplicationInput = z.infer<typeof applicationSchema>;
 
 function CreateApplication() {
   const navigate = useNavigate();
-  const { jobId } = useParams ();
-  const stringifyUser = localStorage.getItem("user");
-  const parsedUser = stringifyUser ? JSON.parse(stringifyUser) : null;
-  const userId = parsedUser?._id;
-  console.log("userId", userId);
-  console.log(jobId, "jobid");
+  const { jobId } = useParams(); 
+  const {token ,setToken} = useAuth()
+
+
 
   const {
     register,
@@ -40,24 +38,24 @@ function CreateApplication() {
       coverLetter: "",
       dateofBirth: new Date().toISOString().split("T")[0],
       resume: null,
-      phone:0,
-      address:"",
+      phone: 0,
+      address: "",
       expectedSalary: 0,
     },
   });
-
- 
 
   const onSubmit = async (data: CreateApplicationInput) => {
     const payLoad = {
       coverLetter: data.coverLetter,
       expectedSalary: data.expectedSalary,
-      address:data.address,
-      phone:data.phone,
-      dateOfBirth:data.dateofBirth
+      address: data.address,
+      phone: data.phone,
+      dateOfBirth: data.dateofBirth,
     };
     try {
-      const token = localStorage.getItem("accessToken");
+
+
+      setToken(token)
       const res = await axios.post(
         `http://localhost:5000/api/application/jobs/${jobId}`,
         payLoad,
@@ -77,128 +75,119 @@ function CreateApplication() {
 
   return (
     <>
-      
-      <NavBar/>
+      <NavBar />
 
-      <div style={{ background: "#f9f9f5" }}>
-        <div className="pb-3 ">
-          <h1 className="text-center fs-48 fw-bold mt-5">Apply for Job</h1>
-          <p className="text-center mt-2">
-            Fill out the application form to apply
-          </p>
+      <div className="bg-gradient-to-b from-blue-50 to-white min-vh-100 py-5">
+        <div className="container text-center mb-5">
+          <h1 className="fs-1 fw-bold text-primary">Apply for Job</h1>
+          <p className="fs-5 text-muted">Fill out the application form to apply</p>
         </div>
 
-        <div className=" d-flex justify-content-center">
+        <div className="container d-flex justify-content-center">
           <form
-          
             onSubmit={handleSubmit(onSubmit)}
-            style={{
-              background: "transparent",
-              width: "75%",
-              padding: "30px",
-            }}
-            className="border rounded-2 mb-5"
+            className="bg-white p-5 rounded-4 shadow-lg w-100"
+            style={{ maxWidth: "800px" }}
           >
-            <div
-              className=" p-4 rounded mb-4 border"
-              style={{ background: "white", width: "100%" }}
-            >
-              <h1>Personal Information</h1>
-              <p>Your details to apply for this job</p>
+            {/* Personal Info */}
+            <div className="mb-5 p-4 rounded-3 border border-light shadow-sm">
+              <h2 className="text-primary mb-3">Personal Information</h2>
+              <p className="text-muted mb-4">Your details to apply for this job</p>
 
-              <label htmlFor="fullName mt-2"> Cover Letter</label>
-              <textarea
-                id="fullName"
-                placeholder="Enter your cover letter"
-                className="form-control mt-3"
-                {...register("coverLetter")}
-              ></textarea>
-              {errors.coverLetter && (
-                <p className="text-danger">{errors.coverLetter.message}</p>
-              )}
+              <div className="mb-3">
+                <label htmlFor="coverLetter" className="form-label fw-semibold">
+                  Cover Letter
+                </label>
+                <textarea
+                  id="coverLetter"
+                  placeholder="Enter your cover letter"
+                  className="form-control form-control-lg rounded-3"
+                  {...register("coverLetter")}
+                  rows={4}
+                />
+                {errors.coverLetter && <p className="text-danger mt-1">{errors.coverLetter.message}</p>}
+              </div>
 
+              <div className="mb-3">
+                <label htmlFor="expectedSalary" className="form-label fw-semibold">
+                  Expected Salary
+                </label>
+                <input
+                  type="number"
+                  id="expectedSalary"
+                  placeholder="Add your demanded salary"
+                  className="form-control form-control-lg rounded-3"
+                  {...register("expectedSalary", { valueAsNumber: true })}
+                />
+                {errors.expectedSalary && <p className="text-danger mt-1">{errors.expectedSalary.message}</p>}
+              </div>
 
-              <label className="mt-3" htmlFor="expectedSalary">
-                Expected Salary
-              </label>
-              <input
-                type="number"
-                id="expectedSalary"
-                placeholder="Add your demanded salary"
-                className="form-control mt-3"
-                {...register("expectedSalary", { valueAsNumber: true })}
-              />
-              {errors.expectedSalary && (
-                <p className="text-danger">{errors.expectedSalary.message}</p>
-              )}
+              <div className="mb-3">
+                <label htmlFor="phone" className="form-label fw-semibold">
+                  Phone
+                </label>
+                <input
+                  type="number"
+                  id="phone"
+                  placeholder="Add your phone number"
+                  className="form-control form-control-lg rounded-3"
+                  {...register("phone", { valueAsNumber: true })}
+                />
+                {errors.phone && <p className="text-danger mt-1">{errors.phone.message}</p>}
+              </div>
 
-              
-              <label className="mt-3" htmlFor="expectedSalary">
-                phone 
-              </label>
-              <input
-                type="number"
-                id="phone"
-                placeholder="Add your phone number"
-                className="form-control mt-3"
-                {...register("phone")}
-              />
-              {errors.phone && (
-                <p className="text-danger">{errors.phone.message}</p>
-              )}
+              <div className="mb-3">
+                <label htmlFor="address" className="form-label fw-semibold">
+                  Address
+                </label>
+                <input
+                  type="text"
+                  id="address"
+                  placeholder="Enter your address"
+                  className="form-control form-control-lg rounded-3"
+                  {...register("address")}
+                />
+                {errors.address && <p className="text-danger mt-1">{errors.address.message}</p>}
+              </div>
 
-
-
-
-              
-              <label className="mt-3" htmlFor="expectedSalary">
-                Date of Birth 
-              </label>
-              <input
-                type="date"
-                id="dateofBirth"
-                placeholder="Add your demanded salary"
-                className="form-control mt-3"
-                {...register("dateofBirth")}
-              />
-              {errors.dateofBirth && (
-                <p className="text-danger">{errors.dateofBirth.message}</p>
-              )}
+              <div className="mb-3">
+                <label htmlFor="dateofBirth" className="form-label fw-semibold">
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  id="dateofBirth"
+                  className="form-control form-control-lg rounded-3"
+                  {...register("dateofBirth")}
+                />
+                {errors.dateofBirth && <p className="text-danger mt-1">{errors.dateofBirth.message}</p>}
+              </div>
             </div>
 
-            <div
-              className="p-4 rounded mb-4 border"
-              style={{
-                background: "white",
-                width: "100%",
-              }}
-            >
-              <h1>Resume Upload</h1>
-              <p>Provide your CV/Resume to complete the application</p>
-              <label htmlFor="resume">Upload Resume</label>
-              <input
-                type="file"
-                id="resume"
-                className="form-control mt-3"
-                {...register("resume")}
-              />
+            {/* Resume Upload */}
+            <div className="mb-5 p-4 rounded-3 border border-light shadow-sm bg-light">
+              <h2 className="text-primary mb-3">Resume Upload</h2>
+              <p className="text-muted mb-4">Provide your CV/Resume to complete the application</p>
+              <label htmlFor="resume" className="form-label fw-semibold">
+                Upload Resume
+              </label>
+              <input type="file" id="resume" className="form-control form-control-lg rounded-3" {...register("resume")} />
             </div>
 
-            <div
-              className="d-flex gap-3 justify-content-center p-4"
-              style={{ background: "transparent", width: "100%" }}
-            >
+            {/* Buttons */}
+            <div className="d-flex gap-3 justify-content-center">
               <button
                 type="submit"
-                style={{ height: "50px", width: "180px" }}
-                className="btn btn-primary"
+                className="btn btn-gradient-primary btn-lg px-5 py-2 rounded-pill shadow-sm text-white fw-bold"
+                style={{
+                  background: "linear-gradient(90deg, #4f46e5, #3b82f6)",
+                }}
               >
                 Submit Application
               </button>
               <button
                 type="reset"
-                style={{ height: "50px", width: "180px" }}
-                className="btn btn-secondary"
+                className="btn btn-outline-secondary btn-lg px-5 py-2 rounded-pill fw-bold"
               >
                 Cancel
               </button>

@@ -1,8 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import z  from "zod";
+import z from "zod";
 import api from "../config/api";
+import "../assets/styles.css";
 
 const forgotPasswordSchema = z.object({
   email: z.email(),
@@ -40,75 +41,60 @@ export default function ForgotPassword() {
   };
 
   return (
-    <>
-      <div
-        className="d-flex justify-content-center p-2"
-        style={{ height: "100%", background: "#f9f9f5" }}
-      >
-        <div
-          className=" p-5 rounded"
-          style={{ width: "500px", background: "white" }}
-        >
-          <div className="text-center mb-2 ">
-            <h1 style={{ fontSize: "32px" }}>📁</h1>
-            <h4 className="mt-2 fs-24 fw-bold">JobPortal</h4>
-          </div>
-
-          <h3 className="text-center fs-32 fw-bold">forgot Password</h3>
-          <p className="text-center fs-16">
-            Enter your Email to change your password
-          </p>
-
-          <form className=" p-2" onSubmit={handleSubmit(forgotPassword)}>
-            <h6 className="mt-4">Reset Password</h6>
-            <p>Enter your email address to receive reset instructions</p>
-            <div>
-              <label className="form-label">email</label>
-              <input
-                {...register("email")}
-                type="email"
-                className="form-control"
-                placeholder="enter your  email"
-              />
-              {errors.email && (
-                <p className="text-danger">{errors.email.message}</p>
-              )}
-            </div>
-            {/* <div>
-            <label className="form-label mt-2">password</label>
-            <input type="number" className="form-control" placeholder="enter your password"></input>
-          </div> */}
-
-            <div>
-              {/* <label for = "role" className="mt-2">Role</label>
-            <select id="role" className="form-select mt-2">
-                <option selected disabled >select your role</option>
-                <option value="applicanr">applicant</option>
-                <option value= "organization admin">organization admin</option>
-                <option value= "system admin">system admin</option>
-
-            </select> */}
-              {/* <a href="/Forgot Password">
-                <p className="mt-2">Forgot Password</p>
-            </a> */}
-
-              <button className="btn btn-primary mt-4 text-center w-100">
-                Send reset Link
-              </button>
-
-              {/* <p className="text-center mt-3">Remember your Password</p> */}
-
+    <div className="signin-container">
+      <div className="signin-card row g-0">
+        <div className="col-lg-6 signin-left d-none d-lg-flex">
+          <div>
+            <div className="signin-logo">📁</div>
+            <h1 className="signin-title">Reset Password</h1>
+            <p className="signin-subtitle">
+              Enter your email address and we'll send you a link to reset your password
+            </p>
+            <div className="mt-4">
+              <p className="mb-2">Remember your password?</p>
               <button
-                style={{ height: "35px" }}
-                className="mt-3 text-center w-100 rounded mt-5"
+                className="btn btn-light btn-lg px-4"
                 onClick={() => navigate("/sign-in")}
               >
-                Back to signIn
+                Sign In
               </button>
+            </div>
+          </div>
+        </div>
+        <div className="col-lg-6 signin-right">
+          <div className="text-center mb-4">
+            <h2 className="fw-bold text-primary">Forgot Password</h2>
+            <p className="text-muted">Enter your email to receive reset instructions</p>
+          </div>
+
+          <form onSubmit={handleSubmit(forgotPassword)}>
+            <div className="form-floating mb-4">
+              <input
+                type="email"
+                className="form-control"
+                id="email"
+                placeholder="name@example.com"
+                {...register("email")}
+              />
+              <label htmlFor="email">Email address</label>
+              {errors.email && (
+                <div className="text-danger small mt-1">{errors.email.message}</div>
+              )}
+            </div>
+
+            <button type="submit" className="btn btn-signin w-100 mb-3">
+              Send Reset Link
+            </button>
+
+            <div className="text-center d-lg-none">
+              <p className="signup-link mb-0">
+                Remember your password?{" "}
+                <span onClick={() => navigate("/sign-in")}>Sign In</span>
+              </p>
             </div>
           </form>
         </div>
       </div>
-    </>
+    </div>
   );
 }

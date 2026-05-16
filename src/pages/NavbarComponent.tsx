@@ -1,291 +1,223 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../config/api";
+import { useAuth } from "../config/AuthProvider";
 
-export default function NavBar() {
-  const userInStringify = localStorage.getItem("user");
-  const user = userInStringify && JSON.parse(userInStringify);
-  console.log(user, "user");
-  const userRole = user?.role;
-  console.log("userRole", userRole);
+function NavBar() {
+  const { user } = useAuth();
+  const role = user?.role;
   const navigate = useNavigate();
-  const [showLogOut, setShowLogOut] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+
+  const gradient = "linear-gradient(135deg, #1e3c72, #2a5298)";
 
   const handleLogOut = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("userId");
+    localStorage.clear();
     navigate("/sign-in");
   };
 
-  const handleProfileClik = async () => {
-    if (user && userRole === "organization") {
+  const handleProfileClick = async () => {
+    if (role === "organization") {
       try {
-    const orgId = user?._id
+        const res = await api.get(`/organization/users/${user?._id}`);
+        const org = res.data;
 
-        const res = await api.get(`/organization/users/${orgId}`);
-        console.log("organization fetch successfully", res.data);
-        const dataOrg = res.data;
+        if (!org) return alert("Organization not created");
+        if (org.status !== "approved") return alert("Not approved");
 
-        if (!dataOrg) {
-          alert("organizatioin not created");
-          return;
-        }
-        if (dataOrg.status !== "approved") {
-          alert("organization status not approved");
-          return;
-        }
-        navigate(`/update-organization/${dataOrg._id}`);
-      } catch (err) {
-        console.error("organization not found");
+        navigate(`/update-organization/${org._id}`);
+      } catch {
+        console.log("Org error");
       }
     } else {
-      navigate(`/update-applicantinformation/${user._id}`);
+      navigate(`/update-applicantinformation/${user?._id}`);
     }
   };
 
   return (
-    <>
-      <div
-        className="container "
-        style={{
-          height: "100px",
-          background: "red",
-        }}
-      >
-        <div
-          style={{
-            height: "100px",
-            width: "100%",
-            background: "grey",
-            position: "fixed",
-            top: 0,
-            left: 0,
-            zIndex: 1000,
-          }}
-        >
-          <div className="d-flex justify-content-between align-items-center h-100 px-5">
-            <div className="d-flex gap-4">
-              <h1 className="mt-5">📁</h1>
-              <div
-                className="d-flex p-2 mt-5  align-items-center"
-                style={{ flexDirection: "column" }}
-              >
-                <h1
-                  className="fw-bold"
-                  style={{
-                    color: "white",
-                    cursor: "pointer",
-                    fontSize: "16px",
-                  }}
-                  onClick={() => navigate("/")}
-                >
-                  JobPortal
-                </h1>
-                <p>
-                  {user?.role} <p style={{ fontSize: "16px" }}>Dashboard</p>
-                </p>
-              </div>
-            </div>
+    <nav
+      className="navbar navbar-expand-lg navbar-dark py-3 sticky-top shadow-sm"
+      style={{ background: gradient }}
+    >
+      <div className="container-fluid">
 
-            <div className="d-flex justify-content-end align-items-center  gap-5 px-5 w-100">
-              <div>
-                {!user && (
+        {/* 🔥 Logo */}
+        <span
+          className="navbar-brand fw-bold cursor-pointer"
+          onClick={() => navigate("/")}
+        >
+          🚀 JobPortal
+        </span>
+
+        {/* Mobile Toggle */}
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span className="navbar-toggler-icon"></span>
+        </button>
+
+        <div className="collapse navbar-collapse" id="navbarNav">
+
+          {/* LEFT LINKS */}
+          <ul className="navbar-nav me-auto">
+
+            {/* Public */}
+            {!user && (
+              <li className="nav-item">
+                <span
+                  className="nav-link cursor-pointer"
+                  onClick={() => navigate("/jobs")}
+                >
+                  Jobs
+                </span>
+              </li>
+            )}
+
+            {/* Applicant */}
+            {role === "applicant" && (
+              <>
+                <li className="nav-item">
+                  <span
+                    className="nav-link cursor-pointer"
+                    onClick={() => navigate("/jobs")}
+                  >
+                    Jobs
+                  </span>
+                </li>
+                <li className="nav-item">
+                  <span
+                    className="nav-link cursor-pointer"
+                    onClick={() => navigate("/my-jobapplied")}
+                  >
+                    My Applications
+                  </span>
+                </li>
+              </>
+            )}
+
+            {/* Organization */}
+            {role === "organization" && (
+              <>
+                <li className="nav-item">
+                  <span
+                    className="nav-link cursor-pointer"
+                    onClick={() => navigate("/my-jobs")}
+                  >
+                    My Jobs
+                  </span>
+                </li>
+                <li className="nav-item">
+                  <span
+                    className="nav-link cursor-pointer"
+                    onClick={() => navigate("/my-organization")}
+                  >
+                  My  Organization
+                  </span>
+                </li>
+              </>
+            )}
+
+            {/* Admin */}
+            {role === "admin" && (
+              <li className="nav-item">
+                <span
+                  className="nav-link cursor-pointer"
+                  onClick={() => navigate("/all-organization")}
+                >
+                 Organizations
+                </span>
+              </li>
+            )}
+          </ul>
+
+          {/* RIGHT SIDE */}
+          <ul className="navbar-nav align-items-center">
+
+            {/* Not logged in */}
+            {!user && (
+              <>
+                <li className="nav-item me-2">
                   <button
-                    className="rounded"
-                    style={{ height: "40px", width: "100px" }}
+                    className="btn btn-light rounded-pill px-4 cursor-pointer"
+                    onClick={() => navigate("/sign-in")}
+                  >
+                    Login
+                  </button>
+                </li>
+
+                <li className="nav-item">
+                  <button
+                    className="btn btn-warning rounded-pill fw-bold px-4 cursor-pointer"
                     onClick={() => navigate("/sign-up")}
                   >
-                    Sign Up
+                    Get Started
                   </button>
-                )}
-              </div>
+                </li>
+              </>
+            )}
 
-              <div>
-                {!user && (
-                  <button
-                    className="rounded"
-                    style={{ height: "40px", width: "150px" }}
-                    onClick={() => navigate("/employer-signup")}
-                  >
-                    Employer/ Sign-up
-                  </button>
-                )}
-              </div>
-
-              {user && userRole === "admin" && (
-                <div className="d-flex justify-content-center align-items-center gap-5">
-                  <button
-                    onClick={() => navigate("/all-organization")}
-                    className="rounded"
-                    style={{ height: "40px", width: "140px" }}
-                  >
-                    All Organization
-                  </button>
-
-                  <div
-                    style={{
-                      width: "35px",
-                      height: "35px",
-                      borderRadius: "50%",
-                      border: "1px solid",
-                      position: "relative",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => setShowLogOut(!showLogOut)}
-                  >
-                    <img
-                      src="https://i.pravatar.cc/150?img=3"
-                      alt="profile"
-                      style={{
-                        width: "35px",
-                        height: "35px",
-                        borderRadius: "50%",
-                      }}
-                    />
+            {/* Logged in */}
+            {user && (
+              <li className="nav-item position-relative">
+                <div
+                  className="d-flex align-items-center cursor-pointer px-2"
+                  onClick={() => setShowMenu(!showMenu)}
+                >
+                  <img
+                    src={`https://i.pravatar.cc/150?u=${user._id}`}
+                    className="rounded-circle me-2 border border-white"
+                    style={{ width: 35, height: 35, objectFit: "cover" }}
+                  />
+                  <div className="text-white small">
+                    <div className="fw-semibold">
+                      {user.firstName} {user.lastName}
+                    </div>
+                    <div style={{ fontSize: "11px", opacity: 0.8 }}>
+                      {role}
+                    </div>
                   </div>
                 </div>
-              )}
-            </div>
 
-            <div className="d-flex gap-5">
-              {showLogOut && (
-                <div
-                  className="rounded  align-items-center border"
-                  style={{
-                    height: "140px",
-                    width: "160px",
-                    background: "white",
-                    textAlign: "center",
-                    position: "absolute",
-                    top: "60px",
-                    right: 0,
-                  }}
-                >
-                  <p
-                    className="rounded text-center mt-4"
-                    onClick={handleLogOut}
+                {/* Dropdown */}
+                {showMenu && (
+                  <div
+                    className="bg-white text-dark shadow"
                     style={{
-                      color: "black",
-                      cursor: "pointer",
+                      position: "absolute",
+                      right: 0,
+                      top: "110%",
+                      borderRadius: "10px",
+                      minWidth: "160px",
+                      overflow: "hidden",
                     }}
                   >
-                    logout
-                  </p>
-                  <p
-                    style={{ color: "black", cursor: "pointer" }}
-                    onClick={handleProfileClik}
-                    // onClick={() =>
-                    //   userRole === "organization" ?
-                    //   navigate(`/update-organization/${user._id}`)
-                    //  : navigate(`/update-applicantinformation/${user._id}`)
-                    // }
-                  >
-                    profile
-                  </p>
-                  <p>{userRole}</p>
-                </div>
-              )}
-              {user && userRole === "applicant" && (
-                <button
-                  onClick={() => navigate("/jobs")}
-                  className="rounded"
-                  style={{ height: "40px", width: "100px" }}
-                >
-                  All Jobs
-                </button>
-              )}
+                    <div
+                      className="p-2 cursor-pointer"
+                      onClick={handleProfileClick}
+                    >
+                      Profile
+                    </div>
 
-              {user && userRole === "applicant" && (
-                <button
-                  onClick={() => navigate("/my-jobapplied")}
-                  className="rounded"
-                  style={{ height: "40px", width: "140px" }}
-                >
-                  My AppliedJob
-                </button>
-              )}
+                    <div className="border-top"></div>
 
-              {user && userRole === "applicant" && (
-                <div
-                  style={{
-                    width: "35px",
-                    height: "35px",
-                    borderRadius: "50%",
-                    border: "1px solid",
-                    position: "relative",
-                  }}
-                >
-                  <img
-                    src="https://i.pravatar.cc/150?img=3"
-                    alt="profile"
-                    style={{
-                      width: "35px",
-                      height: "35px",
-                      borderRadius: "50%",
-                    }}
-                    onClick={() => setShowLogOut(!showLogOut)}
-                  />
-                </div>
-              )}
-
-              {user && userRole === "organization" && (
-                <button
-                  onClick={() => navigate(`/my-jobs`)}
-                  className="rounded"
-                  style={{ height: "40px", width: "100px" }}
-                >
-                  My Jobs
-                </button>
-              )}
-
-              {user && userRole === "organization" && (
-                <button
-                  onClick={() => navigate("/my-organization")}
-                  className="rounded"
-                  style={{ height: "40px", width: "160px" }}
-                >
-                  My Organization
-                </button>
-              )}
-
-              {user && userRole === "organization" && (
-                <div
-                  style={{
-                    width: "35px",
-                    height: "35px",
-                    borderRadius: "50%",
-                    border: "1px solid",
-                    position: "relative",
-                  }}
-                >
-                  <img
-                    src="https://i.pravatar.cc/150?img=3"
-                    alt="profile"
-                    style={{
-                      width: "35px",
-                      height: "35px",
-                      borderRadius: "50%",
-                    }}
-                    onClick={() => setShowLogOut(!showLogOut)}
-                  />
-                </div>
-              )}
-            </div>
-            <div
-              className="d-flex p-4 align-items-center"
-              style={{ flexDirection: "column" }}
-            >
-              <div>
-                {user?.firstName}
-                {user?.lastName}
-              </div>
-              <div>{user?.email}</div>
-              <div>{user?.role}</div>
-            </div>
-          </div>
+                    <div
+                      className="p-2 text-danger cursor-pointer"
+                      onClick={handleLogOut}
+                    >
+                      Logout
+                    </div>
+                  </div>
+                )}
+              </li>
+            )}
+          </ul>
         </div>
       </div>
-    </>
+    </nav>
   );
 }
+
+export default NavBar;

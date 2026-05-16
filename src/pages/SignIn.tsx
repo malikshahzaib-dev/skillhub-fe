@@ -1,8 +1,10 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import api from "../config/api";
+import "../assets/styles.css";
+import { useAuth } from "../config/AuthProvider";
 
 const signInSchema = z.object({
   email: z.email("Invalid email address"),
@@ -10,9 +12,10 @@ const signInSchema = z.object({
 });
 
 type SignInInput = z.infer<typeof signInSchema>;
-
 export default function SignIn() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const {setToken,setUser} = useAuth()
 
   const {
     register,
@@ -25,20 +28,22 @@ export default function SignIn() {
       password: "",
     },
   });
+ 
 
   const signIn = async (data: SignInInput) => {
     try {
       const res = await api.post("/users/login", data);
-      localStorage.setItem("accessToken", res.data.token);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      setUser(res.data.user);
+      setToken(res.data.token);
       if (res.data.user.role === "organization") {
         if (res.data.isOrganizationInformationComplete) {
-          navigate("/organization-dashboard");
+          const from = location.state?.from || "/organization-dashboard";
+          navigate(from);
         } else {
           navigate("/organization-information");
         }
       }
-      
+
       else if (res.data.user.role === "applicant") {
         if (res.data.isApplicantInformationComplete)
           navigate("/applicant-dashboard");
@@ -55,71 +60,96 @@ export default function SignIn() {
   };
 
   return (
-    <>
-      <div className="text-center mb-2 mt-5">
-        <h1 style={{ fontSize: "32px" }}>📁</h1>
-        <h4 className="mt-2 fs-24 fw-bold">JobPortal</h4>
-      </div>
+    <div className="signin-container">
+      <div className="signin-card row g-0">
+        <div className="col-lg-6 signin-left d-none d-lg-flex">
+          <div>
+            <div className="signin-logo">📁</div>
+            <h1 className="signin-title">Welcome Back</h1>
+            <p className="signin-subtitle">
+              Sign in to your account and continue your journey with JobPortal
+            </p>
+            <div className="mt-4">
+              <p className="mb-2">Don't have an account?</p>
+              <div>
+               
+               <button
+                className="btn btn-light btn-lg px-4"
+                onClick={() => navigate("/sign-up")}
+              >
+                Sign Up
+              </button>
+              </div>
 
-      <h3 className="text-center fs-32 fw-bold">Welcome Back</h3>
-      <p className="text-center fs-16">Sign in to your account to continue</p>
-      <div
-        className="d-flex justify-content-center p-4"
-        style={{ height: "100%", background: "f9f9f5" }}
-      >
-        <div
-          className="border p-5 rounded"
-          style={{ width: "500px", background: "white" }}
-        >
-          <form className=" p-3" onSubmit={handleSubmit(signIn)}>
-            <h6>SignIn</h6>
-            <p>Enter your credentials to access your account</p>
+              <div>
 
-            <div>
-              <label className="form-label">Email</label>
+                  <button
+                className="btn btn-light mt-3 btn-lg px-4"
+                onClick={() => navigate("/employer-signup")}
+              >
+              Employer  Sign Up
+              </button>
+              </div>
+              
+
+               
+            </div>
+          </div>
+        </div>
+        <div className="col-lg-6 signin-right">
+          <div className="text-center mb-4">
+            <h2 className="fw-bold text-primary">Sign In</h2>
+            <p className="text-muted">Enter your credentials to access your account</p>
+          </div>
+
+          <form onSubmit={handleSubmit(signIn)}>
+            <div className="form-floating mb-3">
               <input
                 type="email"
                 className="form-control"
-                placeholder="Enter your email"
+                id="email"
+                placeholder="name@example.com"
                 {...register("email")}
               />
+              <label htmlFor="email">Email address</label>
               {errors.email && (
-                <p className="text-danger">{errors.email.message}</p>
+                <div className="text-danger small mt-1">{errors.email.message}</div>
               )}
             </div>
 
-            <div>
-              <label className="form-label mt-2">Password</label>
+            <div className="form-floating mb-3">
               <input
                 type="password"
                 className="form-control"
-                placeholder="Enter your password"
+                id="password"
+                placeholder="Password"
                 {...register("password")}
               />
+              <label htmlFor="password">Password</label>
               {errors.password && (
-                <p className="text-danger">{errors.password.message}</p>
+                <div className="text-danger small mt-1">{errors.password.message}</div>
               )}
             </div>
 
-            <div>
-              <a href="/forgot-password">
-                <p className="mt-2">Forgot Password</p>
-              </a>
-
-              <button
-                type="submit"
-                className="btn btn-primary mt-2 text-center w-100"
-              >
-                SignIn
-              </button>
-
-              <p className="mt-3 text-center" style={{cursor:"pointer"}}>
-                Don't have an account? <span   onClick={() => navigate("/sign-up")}>SignUp</span>
+            <div className="d-flex justify-content-between align-items-center mb-4">
+              <p  onClick={() => navigate("/forgot-password")} className="forgot-link">
+                Forgot Password?
               </p>
             </div>
+
+            <button type="submit" className="btn btn-signin w-100 mb-3">
+              Sign In
+            </button>
+            <div className="text-center d-lg-none">
+              <p className="signup-link mb-0">
+                Don't have an account?{" "}
+                <span onClick={() => navigate("/sign-up")}>Sign Up</span>
+              </p>
+            </div>
+              
           </form>
         </div>
       </div>
-    </>
+    </div>
   );
 }

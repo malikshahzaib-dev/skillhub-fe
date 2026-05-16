@@ -3,8 +3,8 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import z from "zod";
 import api from "../config/api";
-import { useState } from "react";
 import NavBar from "./NavbarComponent";
+import { useAuth } from "../config/AuthProvider";
 
 const OrganizationSchema = z.object({
   name: z.string().min(2, "Organization name is required"),
@@ -20,7 +20,8 @@ const OrganizationSchema = z.object({
 type OrganizationInput = z.infer<typeof OrganizationSchema>;
 
 function CreateOrganization() {
-    const token = localStorage.getItem("token")
+  const {token} = useAuth()
+    
   const navigate = useNavigate();
 
   const {
@@ -77,117 +78,137 @@ function CreateOrganization() {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           {/* Basic Info */}
-          <div className="d-flex justify-content-center pt-3">
-            <div
-              className="rounded p-5"
-              style={{ width: "900px", background: "#ffffff" }}
-            >
-              <h1 className="fs-8">Basic Information</h1>
-              <p className="mt-2" style={{ fontSize: "20px" }}>
-                Essential details about the organization
-              </p>
+         <div className="d-flex justify-content-center pt-4">
+  <div
+    className="card shadow-lg rounded-4 p-5"
+    style={{ width: "900px", backgroundColor: "#ffffff", minHeight: "380px" }}
+  >
+    {/* Header */}
+    <div className="mb-4">
+      <h3 className="fw-bold mb-1">
+        <i className="bi bi-info-circle me-2"></i>Basic Information
+      </h3>
+      <small className="text-muted">Essential details about the organization</small>
+    </div>
 
-              <div className="d-flex gap-4 mt-4" style={{ width: "100%" }}>
-                <div style={{ width: "50%" }}>
-                  <label className="form-label fw-semibold">Organization Name *</label>
-                  <input
-                    {...register("name")}
-                    type="text"
-                    className="form-control"
-                    style={{ height: "50px" }}
-                    placeholder="e.g. TechCorp Inc."
-                  />
-                  {errors.name && <p className="text-danger">{errors.name.message}</p>}
-                </div>
-                <div style={{ width: "50%" }}>
-                  <label className="form-label fw-semibold">Industry</label>
-                  <input
-                    {...register("industry")}
-                    type="text"
-                    className="form-control"
-                    style={{ height: "50px" }}
-                    placeholder="e.g. Software, Healthcare"
-                  />
-                  {errors.industry && <p className="text-danger">{errors.industry.message}</p>}
-                </div>
-              </div>
+    {/* Form Inputs */}
+    <div className="row g-4">
+      <div className="col-md-6">
+        <label className="form-label fw-semibold">Organization Name *</label>
+        <input
+          {...register("name")}
+          type="text"
+          className="form-control"
+          style={{ height: "50px" }}
+          placeholder="e.g. TechCorp Inc."
+        />
+        {errors.name && <p className="text-danger mt-1">{errors.name.message}</p>}
+      </div>
 
-              <label className="form-label mt-4 fw-semibold">Description *</label>
-              <textarea
-                {...register("description")}
-                className="form-control rounded"
-                style={{ height: "120px" }}
-                placeholder="Brief description about the organization"
-              />
-              {errors.description && <p className="text-danger">{errors.description.message}</p>}
-            </div>
-          </div>
+      <div className="col-md-6">
+        <label className="form-label fw-semibold">Industry</label>
+        <input
+          {...register("industry")}
+          type="text"
+          className="form-control"
+          style={{ height: "50px" }}
+          placeholder="e.g. Software, Healthcare"
+        />
+        {errors.industry && <p className="text-danger mt-1">{errors.industry.message}</p>}
+      </div>
+
+      <div className="col-12">
+        <label className="form-label fw-semibold">Description *</label>
+        <textarea
+          {...register("description")}
+          className="form-control rounded"
+          style={{ height: "120px" }}
+          placeholder="Brief description about the organization"
+        />
+        {errors.description && <p className="text-danger mt-1">{errors.description.message}</p>}
+      </div>
+    </div>
+  </div>
+</div>
+
 
           {/* Contact Info */}
-          <div className="d-flex justify-content-center mt-5 rounded">
-            <div
-              className="p-4 rounded"
-              style={{ width: "900px", background: "#ffffff" }}
-            >
-              <h1 className="fs-8">Contact Information</h1>
-              <p style={{ fontSize: "20px" }}>
-                How can people reach your organization?
-              </p>
+         <div className="d-flex justify-content-center mt-5">
+  <div
+    className="card shadow-lg rounded-4 p-5"
+    style={{ width: "900px", backgroundColor: "#ffffff", minHeight: "420px" }}
+  >
+    {/* Header */}
+    <div className="mb-4">
+      <h3 className="fw-bold mb-1">
+        <i className="bi bi-telephone me-2"></i>Contact Information
+      </h3>
+      <small className="text-muted">
+        How can people reach your organization?
+      </small>
+    </div>
 
-              <div className="d-flex gap-4 mt-4" style={{ width: "100%" }}>
-                <div style={{ width: "50%" }}>
-                  <label className="form-label fw-semibold">Contact Email *</label>
-                  <input
-                    {...register("contactEmail")}
-                    type="email"
-                    className="form-control"
-                    style={{ height: "50px" }}
-                    placeholder="hr@company.com"
-                  />
-                  {errors.contactEmail && (
-                    <p className="text-danger">{errors.contactEmail.message}</p>
-                  )}
-                </div>
+    {/* Form */}
+    <div className="row g-4">
+      <div className="col-md-6">
+        <label className="form-label fw-semibold">Contact Email *</label>
+        <input
+          {...register("contactEmail")}
+          type="email"
+          className="form-control"
+          style={{ height: "50px" }}
+          placeholder="hr@company.com"
+        />
+        {errors.contactEmail && (
+          <p className="text-danger mt-1">{errors.contactEmail.message}</p>
+        )}
+      </div>
 
-                <div style={{ width: "50%" }}>
-                  <label className="form-label fw-semibold">Phone</label>
-                  <input
-                    {...register("phone")}
-                    type="text"
-                    className="form-control"
-                    style={{ height: "50px" }}
-                    placeholder="+92 300 1234567"
-                  />
-                  {errors.phone && <p className="text-danger">{errors.phone.message}</p>}
-                </div>
-              </div>
+      <div className="col-md-6">
+        <label className="form-label fw-semibold">Phone</label>
+        <input
+          {...register("phone")}
+          type="text"
+          className="form-control"
+          style={{ height: "50px" }}
+          placeholder="+92 300 1234567"
+        />
+        {errors.phone && (
+          <p className="text-danger mt-1">{errors.phone.message}</p>
+        )}
+      </div>
 
-              <div className="d-flex gap-4 mt-4" style={{ width: "100%" }}>
-                <div style={{ width: "50%" }}>
-                  <label className="form-label fw-semibold">Website</label>
-                  <input
-                    {...register("website")}
-                    type="text"
-                    className="form-control"
-                    style={{ height: "50px" }}
-                    placeholder="https://company.com"
-                  />
-                  {errors.website && <p className="text-danger">{errors.website.message}</p>}
-                </div>
-                <div style={{ width: "50%" }}>
-                  <label className="form-label fw-semibold">Address</label>
-                  <input
-                    {...register("address")}
-                    type="text"
-                    className="form-control"
-                    style={{ height: "50px" }}
-                    placeholder="123 Main St, New York"
-                  />
-                  {errors.address && <p className="text-danger">{errors.address.message}</p>}
-                </div>
-              </div>
-            </div>
-          </div>
+      <div className="col-md-6">
+        <label className="form-label fw-semibold">Website</label>
+        <input
+          {...register("website")}
+          type="text"
+          className="form-control"
+          style={{ height: "50px" }}
+          placeholder="https://company.com"
+        />
+        {errors.website && (
+          <p className="text-danger mt-1">{errors.website.message}</p>
+        )}
+      </div>
+
+      <div className="col-md-6">
+        <label className="form-label fw-semibold">Address</label>
+        <input
+          {...register("address")}
+          type="text"
+          className="form-control"
+          style={{ height: "50px" }}
+          placeholder="123 Main St, New York"
+        />
+        {errors.address && (
+          <p className="text-danger mt-1">{errors.address.message}</p>
+        )}
+      </div>
+    </div>
+  </div>
+</div>
+
 
           {/* Submit Button */}
           <div className="d-flex justify-content-center mt-5 p-3">
